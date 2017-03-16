@@ -15,7 +15,7 @@ function install() {
   document.write('SW installed!');
 }
 
-window.onload = () => {
+(() => {
   const self = this;
   register();
-};
+})();
