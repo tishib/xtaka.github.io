@@ -17,6 +17,5 @@ function install() {
 
 window.onload = () => {
   const self = this;
-  self.addEventListener('install', install);
   register();
 };
