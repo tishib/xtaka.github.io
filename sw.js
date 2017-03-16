@@ -17,6 +17,6 @@ function install() {
 
 (() => {
   const self = this;
-  register();
   self.addEventListener('install', install, false);
+  register();
 })();
