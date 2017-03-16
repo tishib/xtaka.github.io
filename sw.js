@@ -11,6 +11,12 @@ function register() {
   }
 }
 
+function install() {
+  document.write('SW installed!');
+}
+
 (() => {
+  const self = this;
   register();
+  self.addEventListener('install', install, false);
 })();
