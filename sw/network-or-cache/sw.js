@@ -15,11 +15,10 @@ self.addEventListener('fetch', (evt) => {
 function precache() {
   return caches.open(CACHE).then((cache) => {
     return cache.addAll([
-      '/sw/network-or-cache/index.html',
-      '/sw/network-or-cache/index.js',
-      '/sw/network-or-cache/sw.js',
-      '/sw/network-or-cache/controlled/controlled.html',
-      '/sw/network-or-cache/controlled/whale-flat.PNG'
+      './index.html',
+      './index.js',
+      './controlled/controlled.html',
+      './controlled/whale-flat.PNG'
     ]);
   });
 }
