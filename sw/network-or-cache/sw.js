@@ -15,6 +15,8 @@ self.addEventListener('fetch', (evt) => {
 function precache() {
   return caches.open(CACHE).then((cache) => {
     return cache.addAll([
+      './index.html',
+      './index.js',
       './controlled/controlled.html',
       './controlled/whale-flat.PNG'
     ]);
