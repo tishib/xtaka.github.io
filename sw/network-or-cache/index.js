@@ -1,4 +1,4 @@
-navigator.serviceWorker.register('/sw/network-or-cache/sw.js', {scope: '/sw/network-or-cache/controlled'}); // First arg is "relative path" from current origin.
+navigator.serviceWorker.register('sw.js', {scope: '/controlled'}); // First arg is "relative path" from current origin.
 
 navigator.serviceWorker.ready.then(reload);
 
