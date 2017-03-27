@@ -2,21 +2,21 @@ var CACHE = 'network-or-cache';
 
 self.addEventListener('install', (evt) => {
   console.log('The SW is being installed.');
-  evt.waitUntil(precache()); // waitUntil: 引数からresolveが返るまで待機
-}); // self: window.self
+  evt.waitUntil(precache()); // waitUntil: wait untile a resoleve return.
+}); // self = window.self
 
 self.addEventListener('fetch', (evt) => {
   console.log('The SW is serving the asset.');
   evt.respondWith(fromNetwork(evt.request, 400).catch(() => {
     return fromCache(evt.request);
-  })); // respondWith: 何か返るまで待機
+  })); // respondWith: wait untile anything.
 });
 
 function precache() {
   return caches.open(CACHE).then((cache) => {
     return cache.addAll([
-      './controlled.html',
-      './asset'
+      './sw/network-or-cache/controlled/controlled.html',
+      './sw/network-or-cache/controlled/whale-flat.PNG'
     ]);
   });
 }
