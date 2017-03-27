@@ -1,4 +1,4 @@
-navigator.serviceWorker.register('/sw.js', {scope: './controlled'});
+navigator.serviceWorker.register('sw.js', {scope: './controlled'});
 
 navigator.serviceWorker.ready.then(reload);
 
