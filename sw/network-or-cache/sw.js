@@ -15,8 +15,8 @@ self.addEventListener('fetch', (evt) => {
 function precache() {
   return caches.open(CACHE).then((cache) => {
     return cache.addAll([
-      './sw/network-or-cache/controlled/controlled.html',
-      './sw/network-or-cache/controlled/whale-flat.PNG'
+      './controlled/controlled.html',
+      './controlled/whale-flat.PNG'
     ]);
   });
 }
