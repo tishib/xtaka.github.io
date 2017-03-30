@@ -13,10 +13,10 @@ self.addEventListener('fetch', (evt) => {
 function precache() {
  return caches.open(CACHE).then((cache) => {
   return cache.addAll([
-   '/sw/cach-only/index.html',
-   '/sw/cach-only/index.js',
-   '/sw/cach-only/controlled/controlled.html',
-   '/sw/cach-only/controlled/sample.PNG'
+   '/sw/cache-only/index.html',
+   '/sw/cache-only/index.js',
+   '/sw/cache-only/controlled/controlled.html',
+   '/sw/cache-only/controlled/sample.PNG'
   ]);
  });
 }
