@@ -11,7 +11,20 @@ self.addEventListener('fetch', (evt) => {
 });
 
 function precache() {
-  return caches.open()
+ return caches.open(CACHE).then((cache) => {
+  return cache.addAll([
+   './index.html',
+   './index.js',
+   './controlled/controlled.html',
+   './controlled/whale-flat.PNG'
+  ]);
+ });
 }
 
-function fromCache() {}
+function fromCache(request) {
+ return caches.open(CACHE).then((cache) => {
+  return cache.match(request).then((matching) => {
+   return matching || Promise.reject('no match');
+  });
+ });
+}
