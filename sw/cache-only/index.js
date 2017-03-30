@@ -1,4 +1,4 @@
-navigator.serviceWorker.register('/sw/cache-only/sw.js', {scope: '/sw/cache-only/'});
+navigator.serviceWorker.register('/sw/cache-only/sw.js');
 
 navigator.serviceWorker.ready.then(reload);
 
