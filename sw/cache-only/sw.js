@@ -15,6 +15,7 @@ function precache() {
   return cache.addAll([
    './index.html',
    './index.js',
+   './sw.js',
    './controlled/controlled.html',
    './controlled/sample.PNG'
   ]);
