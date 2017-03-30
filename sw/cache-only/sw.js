@@ -11,8 +11,8 @@ self.addEventListener('fetch', (evt) => {
 });
 
 function precache() {
- return caches.open(CACHE).then((cache) => {
-  return cache.addAll([
+ return caches.open(CACHE).then((cache) => { // open my cache and throw a getting my cache
+  return cache.addAll([ // put only URL stying
    '/sw/cache-only/index.html',
    '/sw/cache-only/index.js',
    '/sw/cache-only/controlled/controlled.html',
