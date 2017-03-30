@@ -16,7 +16,7 @@ function precache() {
    './index.html',
    './index.js',
    './controlled/controlled.html',
-   './controlled/whale-flat.PNG'
+   './controlled/sample.PNG'
   ]);
  });
 }
