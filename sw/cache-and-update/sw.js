@@ -8,7 +8,7 @@ self.addEventListener('install', (evt) => {
 self.addEventListener('fetch', (evt) => {
   console.log('SW is serving the asset.');
   evt.respondWith(fromCache(evt.request));
-  evt.waitUntill(update(evt.request));
+  evt.waitUntil(update(evt.request));
 });
 
 function precache() {
