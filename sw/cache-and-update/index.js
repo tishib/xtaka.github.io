@@ -1,4 +1,4 @@
-navigator.serviceWorker.register('/sw/cache-only/sw.js');
+navigator.serviceWorker.register('/sw/cache-and-update/sw.js');
 
 navigator.serviceWorker.ready.then(reload);
 
