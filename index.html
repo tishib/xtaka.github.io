@@ -29,25 +29,5 @@
     <button id='getDataButton'>Get new data</button>
   
     <script src='./index.js'></script>
-    <script>
-      'use strict';
-      (()=>{
-        var cacheName = 'what-is-cache';
-        var dataURL = 'https://data.com';
-        var fd = new FormData();
-        var now = Date.now();
-        fd.append('now',now);
-        var myRes = new Response(fd, {'status':200, 'statusText':'OK', 'headers':'HOGE!'});
-        
-        caches.open(cacheName).then((cache)=>{
-          cache.put(dataURL,myRes);
-        })
-        .then(()=>{
-          caches.match(dataURL).then((res)=>{
-            console.log(res);
-          });
-        });
-      })();
-    </script>
   </body>
 </html>
