@@ -29,5 +29,14 @@
     <button id='getDataButton'>Get new data</button>
   
     <script src='./index.js'></script>
+    <script>
+      'use strict';
+      (()=>{
+        var cacheName = 'what-is-cache';
+        caches.open(cacheName).then((cache)=>{
+          cache.put('http://test.com','it is god');
+        });
+      })();
+    </script>
   </body>
 </html>

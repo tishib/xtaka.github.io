@@ -25,7 +25,7 @@ function reset() {
   isGotNetworkData = false;
 }
 
-function disabelUi() {
+function disableUI() {
   getDataButton.disabled = true;
   cacheDelayInput.disabled = true;
   cacheFailInput.disabled = true;
@@ -69,7 +69,7 @@ function handleCacheFetchCompletion(response) {
   });
 }
 
-function enableUi() {
+function enableUI() {
   getDataButton.disabled = false;
   cacheDelayInput.disabled = false;
   cacheFailInput.disabled = false;
@@ -78,7 +78,7 @@ function enableUi() {
 }
 
 getDataButton.addEventListener('click', function handleClick() {
-  disabelUi();
+  disableUI();
 
   networkStatus.textContent = 'Getting...';
   networkGetStartTime = Date.now();
@@ -144,5 +144,5 @@ getDataButton.addEventListener('click', function handleClick() {
       });
     });
 
-    Promise.all([networkFetch, cacheFetch]).then(enableUi);
+    Promise.all([networkFetch, cacheFetch]).then(enableUI);
 });
