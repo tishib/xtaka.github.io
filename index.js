@@ -130,6 +130,16 @@ getDataButton.addEventListener('click', function handleClick() {
             }
           }, cacheDelay);
         });
+      })
+      .then(function() {
+        var now = Date.now();
+        var elapsed = now - cacheGetStartTiem;
+        cacheStatus.textContent = 'Success after ' + elapsed + 'ms';
+      })
+      .catch(function(err) {
+        var now = Date.now();
+        var elapsed = now - cacheGetStartTiem;
+        cacheStatus.textContent = err + ' after ' + elapsed + 'ms';
       });
     });
 
