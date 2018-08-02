@@ -7,6 +7,7 @@ var cacheStatus = document.getElementById('cacheStatus');
 var networkStatus = document.getElementById('networkStatus');
 var getDataButton = document.getElementById('getDataButton');
 var dataOutput = document.getElementById('data');
+var getCacheKeysButton = document.getElementById('getCacheKyesButton');
 
 var cacheName = 'cache-then-network'
 
@@ -144,4 +145,12 @@ getDataButton.addEventListener('click', function handleClick() {
     });
 
     Promise.all([networkFetch, cacheFetch]).then(enableUI);
+});
+
+getCacheKeysButton.addEventListener('click', function handleClick() {
+  caches.open(dataURL).then(function(cache) {
+    cache.keys().then(function(keys) {
+      console.log(keys);
+    });
+  });
 });
