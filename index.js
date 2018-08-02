@@ -1,4 +1,4 @@
-var dataUrl = 'https://api.github.com/events';
+var dataURL = 'https://api.github.com/events';
 var cacheDelayInput = document.getElementById('cacheDelay');
 var cacheFailInput = document.getElementById('cacheFail');
 var networkDelayInput = document.getElementById('networkDelay');
@@ -48,7 +48,7 @@ function handleFetchCompletion(response) {
 
   var resClone = response.clone();
   caches.open(cacheName).then(function(cache) {
-    cache.put(dataUrl, resClone);
+    cache.put(dataURL, resClone);
   });
 
   response.json().then(function(data) {
@@ -85,7 +85,7 @@ getDataButton.addEventListener('click', function handleClick() {
   networkGetStartTime = Date.now();
 
   var cacheBuster = Date.now();
-  var networkFetch = fetch(dataUrl + '?cacheBuster=' + cacheBuster, {
+  var networkFetch = fetch(dataURL + '?cacheBuster=' + cacheBuster, {
       mode: 'cors',
       cache: 'no-cache',
     })
@@ -118,7 +118,7 @@ getDataButton.addEventListener('click', function handleClick() {
     cacheStatus.textContent = 'Getting...';
     cacheGetStartTiem = Date.now();
     var cacheFetch = caches.open(cacheName).then(function(cache) {
-      return cache.match(dataUrl).then(function(response) {
+      return cache.match(dataURL).then(function(response) {
         var cacheDelay = cacheDelayInput.value || 0;
 
         return new Promise(function(resolve, reject) {
