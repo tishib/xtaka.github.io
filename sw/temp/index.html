@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>temporary app</title>
+  </head>
+  <body>
+    <div>
+      <button id="show">show</button>
+      <select>
+        <option value="./imgs/sample1.png">image 1</option>
+        <option value="./imgs/sample2.png">image 2</option>
+        <option value="./imgs/sample3.png">image 3</option>
+      </select>
+      <div id='container'></div>
+    </div>
+    <script>
+      'use strict';
+      (() => {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./sw.js');
+        }
+        document.querySelector('#show').addEventListener('click', () => {
+          const source = document.querySelector('select').selectedOptions[0].value;
+          const imgElement = document.createElement('img');
+          imgElement.src = source;
+          document.querySelector('#container').appendChild(imgElement);
+        });
+      })();
+    </script>
+  </body>
+</html>
