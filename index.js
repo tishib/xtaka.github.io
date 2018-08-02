@@ -7,7 +7,7 @@ var cacheStatus = document.getElementById('cacheStatus');
 var networkStatus = document.getElementById('networkStatus');
 var getDataButton = document.getElementById('getDataButton');
 var dataOutput = document.getElementById('data');
-var getCacheKeysButton = document.getElementById('getCacheKyesButton');
+var getCacheKeysButton = document.getElementById('getCacheKeysButton');
 
 var cacheName = 'cache-then-network'
 
