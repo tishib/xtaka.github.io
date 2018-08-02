@@ -37,7 +37,7 @@
         var fd = new FormData();
         var now = Date.now();
         fd.append('now',now);
-        var myRes = Response.Response(fd, {'status':200, 'statusText':'OK', 'headers':'HOGE!'});
+        var myRes = new Response(fd, {'status':200, 'statusText':'OK', 'headers':'HOGE!'});
         
         caches.open(cacheName).then((cache)=>{
           cache.put(dataURL,myRes);
