@@ -33,8 +33,14 @@
       'use strict';
       (()=>{
         var cacheName = 'what-is-cache';
+        var dataURL = 'https://data.com';
+        var now = Date.now();
         caches.open(cacheName).then((cache)=>{
-          cache.put('http://test.com','it is god');
+          cache.put(dataURL,now);
+        });
+        
+        caches.match(dataURL).then((res)=>{
+          console.log(res);
         });
       })();
     </script>
