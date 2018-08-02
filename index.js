@@ -117,7 +117,6 @@ getDataButton.addEventListener('click', function handleClick() {
     cacheStatus.textContent = 'Getting...';
     cacheGetStartTiem = Date.now();
     var cacheFetch = caches.open(cacheName).then(function(cache) {
-      console.log(cache);
       return cache.match(dataUrl).then(function(response) {
         var cacheDelay = cacheDelayInput.value || 0;
 
