@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <titel>Cache then network</titel>
+    <style>
+      body {
+        font-family: monospace;
+        font-size: 1rem;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <label>Data: </label><output id='data'></output>
+    <label>Cache: </label><output id='cacheStatus'></output>
+    <label>Network: </label><output id='networkStatus'></output>
+  
+    <form>Cache:
+      <input id='cacheFail' type='checkbox'>Fail</input>
+      Delay: <input id='cacheDelay' type='number' value='500'></input>ms
+    </form>
+  
+    <form>Network:
+      <input id='networkFail' type='checkbox'>Fail</input>
+      Delay: <input id='networkDelay' type='number' value='1250'></input>ms
+    </form>
+  
+    <button id='getDataButton'>Get new data</button>
+    <button id='getCacheKeysButton'>Get cache kyes</button>
+    <button id='removeAllCacheValuesButton'>Remove all cache values</button>
+  
+    <script src='./index.js'></script>
+  </body>
+</html>
