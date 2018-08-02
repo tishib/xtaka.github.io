@@ -148,7 +148,7 @@ getDataButton.addEventListener('click', function handleClick() {
 });
 
 getCacheKeysButton.addEventListener('click', function handleClick() {
-  caches.open(dataURL).then(function(cache) {
+  caches.open(cacheName).then(function(cache) {
     cache.keys().then(function(keys) {
       console.log(keys);
     });
