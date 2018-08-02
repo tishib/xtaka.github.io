@@ -8,6 +8,7 @@ var networkStatus = document.getElementById('networkStatus');
 var getDataButton = document.getElementById('getDataButton');
 var dataOutput = document.getElementById('data');
 var getCacheKeysButton = document.getElementById('getCacheKeysButton');
+var removeAllCacheValuesButton = document.getElementById('removeAllCacheValuesButton');
 
 var cacheName = 'cache-then-network'
 
@@ -154,3 +155,13 @@ getCacheKeysButton.addEventListener('click', function handleClick() {
     });
   });
 });
+
+removeAllCacheValuesButton.addEventListener('click', function handleClick() {
+  caches.open(cacheName).then(function(cache) {
+    cache.keys().then(function(requests) {
+      requests.forEach(function(request) {
+        cache.delete(request);
+      })
+    });
+  });
+})
