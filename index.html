@@ -34,13 +34,18 @@
       (()=>{
         var cacheName = 'what-is-cache';
         var dataURL = 'https://data.com';
+        var fd = new FormData();
         var now = Date.now();
-        caches.open(cacheName).then((cache)=>{
-          cache.put(dataURL,now);
-        });
+        fd.append('now',now);
+        var myRes = Response.Response(fd, {'status':200, 'statusText':'OK', 'headers':'HOGE!'});
         
-        caches.match(dataURL).then((res)=>{
-          console.log(res);
+        caches.open(cacheName).then((cache)=>{
+          cache.put(dataURL,myRes);
+        })
+        .then(()=>{
+          caches.match(dataURL).then((res)=>{
+            console.log(res);
+          });
         });
       })();
     </script>
