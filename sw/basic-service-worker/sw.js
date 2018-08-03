@@ -1,14 +1,14 @@
 'use strict';
 const CACHE_NAME = 'cache-v1';
-const RUNTIME = 'runtime';
+const RUNTIME = 'runtime'; // for URLs that is not defined in CACHE_URLS
 const CACHE_URLS = [
-  // 'index.html',
-  // 'index.js'
+  'index.html',
+  'index.js'
 ];
 
 // inistall event run only once
 self.addEventListener('install', event => {
-  console.log('on install');
+  console.log('SW installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
     .then(cache => cache.addAll(CACHE_URLS))
@@ -17,7 +17,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  console.log('on activate');
+  console.log('SW activating...');
 
   const currentCaches = [CACHE_NAME, RUNTIME];
   event.waitUntil(
@@ -34,7 +34,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  console.log('on fetch');
+  console.log('SW intercept for fetch request!');
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
