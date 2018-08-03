@@ -2,10 +2,11 @@
 const CACHE_NAME = 'cache-v1';
 const RUNTIME = 'runtime';
 const CACHE_URLS = [
-  'index.html',
-  'index.js'
+  // 'index.html',
+  // 'index.js'
 ];
 
+// inistall event run only once
 self.addEventListener('install', event => {
   console.log('on install');
   event.waitUntil(
@@ -17,6 +18,7 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   console.log('on activate');
+
   const currentCaches = [CACHE_NAME, RUNTIME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -33,7 +35,6 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   console.log('on fetch');
-  console.log(event)
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
