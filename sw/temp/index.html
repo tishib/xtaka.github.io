@@ -2,9 +2,17 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>temporary app</title>
+    <title>Basic Service Worker Sample App</title>
   </head>
   <body>
+    <div>
+      <h3>overview:</h3>
+      <a href="https://googlechrome.github.io/samples/service-worker/basic/index.html">source</a>
+      <p>offline reload</p>
+      <p>cache first</p>
+      <p>intercepts network requests</p>
+      <p>if no cached response, fetch a response from network</p>
+    </div>
     <div>
       <button id="show">show</button>
       <select>
@@ -14,19 +22,6 @@
       </select>
       <div id='container'></div>
     </div>
-    <script>
-      'use strict';
-      (() => {
-        if ('serviceWorker' in navigator) {
-          // navigator.serviceWorker.register('./sw.js');
-        }
-        document.querySelector('#show').addEventListener('click', () => {
-          const source = document.querySelector('select').selectedOptions[0].value;
-          const imgElement = document.createElement('img');
-          imgElement.src = source;
-          document.querySelector('#container').appendChild(imgElement);
-        });
-      })();
-    </script>
+    <script src="./index.js"></script>
   </body>
 </html>
