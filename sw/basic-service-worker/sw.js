@@ -33,7 +33,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   console.log('on fetch');
-  console.log(event.request)
+  console.log(event)
   if (event.request.url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request)
@@ -51,6 +51,9 @@ self.addEventListener('fetch', event => {
             })
           })
         })
+      })
+      .catch(err => {
+        console.log(err + ' after fetching')
       })
     );
   }
