@@ -2,8 +2,8 @@
 (() => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('SW registered.'))
-      .catch(err => console.log('Failed to register, ', err));
+      .then(() => console.log('Registered SW!'))
+      .catch(err => console.log('Failed to register SW..., ', err));
   }
   document.querySelector('#show').addEventListener('click', () => {
     const source = document.querySelector('select').selectedOptions[0].value;
