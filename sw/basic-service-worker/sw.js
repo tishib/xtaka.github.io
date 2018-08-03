@@ -3,6 +3,7 @@ const CACHE_NAME = 'cache-v1';
 
 const CACHE_URLS = [
   'index.html',
+  'index.js'
 ];
 const RUNTIME = 'runtime';
 
@@ -14,6 +15,7 @@ self.addEventListener('install', event => {
     .then(self.skipWaiting())
   );
 });
+
 self.addEventListener('activate', event => {
   console.log('on activate');
   const currentCaches = [CACHE_URLS, RUNTIME];
@@ -29,6 +31,7 @@ self.addEventListener('activate', event => {
     .then(() => self.clients.claim())
   );
 });
+
 self.addEventListener('fetch', event => {
   console.log('on fetch');
   if (event.request.url.startsWith(self.location.origin)) {
