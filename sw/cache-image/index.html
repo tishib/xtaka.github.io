@@ -21,9 +21,9 @@
       'use strict';
       (() => {
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('sw.js')
-            .then(() => console.log(' Successed to register SW.'))
-            .catch(err => console.log('failed to register SW, ', err));
+          // navigator.serviceWorker.register('sw.js')
+          //   .then(() => console.log(' Successed to register SW.'))
+          //   .catch(err => console.log('failed to register SW, ', err));
         } else {
           console.log('not support SW.');
         }
