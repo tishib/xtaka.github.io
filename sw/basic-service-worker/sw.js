@@ -1,11 +1,10 @@
 'use strict';
 const CACHE_NAME = 'cache-v1';
-
+const RUNTIME = 'runtime';
 const CACHE_URLS = [
   'index.html',
   'index.js'
 ];
-const RUNTIME = 'runtime';
 
 self.addEventListener('install', event => {
   console.log('on install');
@@ -18,7 +17,7 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   console.log('on activate');
-  const currentCaches = [CACHE_URLS, RUNTIME];
+  const currentCaches = [CACHE_NAME, RUNTIME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
