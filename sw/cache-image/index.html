@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div>
+      <img src="./imgs/icon1.png">
+      <img src="./imgs/icon2.png">
+      <img src="./imgs/icon3.png">
+      <img src="./imgs/icon4.png">
+      <img src="./imgs/icon5.png">
+      <img src="./imgs/icon6.png">
+      <img src="./imgs/icon7.png">
+      <img src="./imgs/icon8.png">
+      <img src="./imgs/icon9.png">
+      <img src="./imgs/icon10.png">
+      <img src="./imgs/icon11.png">
+    </div>
+    <script>
+      'use strict';
+      (() => {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js')
+            .then(() => console.log(' Successed to register SW.'))
+            .catch(err => console.log('failed to register SW, ', err));
+        } else {
+          console.log('not support SW.');
+        }
+      })();
+    </script>
+  </body>
+</html>
