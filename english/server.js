@@ -15,6 +15,3 @@ server.listen(port, () => {
   console.log(`Running on ${url}`);
   opn(`${url}`)
 });
-
-
-console.log(process.platform)
