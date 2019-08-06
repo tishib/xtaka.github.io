@@ -7,9 +7,18 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "sh run-server.sh"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "os": "win32",
+  "dependencies": {},
+  "devDependencies": {
+    "express": "4.17.1",
+    "node": "12.7.0",
+    "opn": "6.0.0",
+    "path": "0.12.7"
+  }
 }
