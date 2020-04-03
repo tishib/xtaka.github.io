@@ -1,0 +1,18 @@
+html {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[class *= "col-"] {
+  float: left;
+  padding: 15px;
+}
+@media only screen and (max-widt: 600px) {
+  /* Extra small device */
+  [class *= "col-"] {
+    width: 100%;
+  }
+}
