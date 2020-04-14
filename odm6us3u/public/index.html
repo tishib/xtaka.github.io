@@ -8,23 +8,21 @@
   </head>
   <body>
     <noscript>
-      <p>Not support or turned off for JavaScript.</p>
+      <p>Turned off JavaScript.</p>
     </noscript>
-    <div>
-      <div class="row">
-        <textarea id="word-list" class="col-s-12 col-m-9 col-l-6" maxlength=4096></textarea>
-      </div>
-      <div class="row">
-        <button id="create-button" class="col-s-12 col-m-9 col-l-6">Create</button>
-      </div>
+    <div class="row">
+      <textarea id="words" class="col-s-12 col-m-9 col-l-6" maxlength=4096></textarea>
+      <button id="create-button" class="col-s-12 col-m-9 col-l-6">Create</button>
     </div>
-    <div>
-      <div>
-        <p>Problem</p>
-      </div>
-      <ul>
-        <li></li>
-      </ul>
+    <div class="row">
+      <h3>Problem</h3>
+      <table>
+        <tr id="ans1" class="col-s-9"><td>Answer</td></tr>
+        <tr id="ans2" class="col-s-9"><td>Answer</td></tr>
+        <tr id="ans3" class="col-s-9"><td>Answer</td></tr>
+        <tr id="ans4" class="col-s-9"><td>Answer</td></tr>
+      </table>
     </div>
+    <script src="index.js" async></script>
   </body>
 </html>
