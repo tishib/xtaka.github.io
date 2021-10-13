@@ -1,7 +1,12 @@
+'use strict';
 /**
  * IMPROVE
  * - Rename for pl, bpm, lm easy to understand
+ * - 
 */
+
+// import test from "mod/mock.js"; // todo CORS
+
 
 // pole
 const pl = []; // pole list
@@ -22,7 +27,7 @@ function getPoles() {
         return resolve(pl);
       }
     });
-    r1.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:BusstopPole?odpt:operator=odpt.Operator:Toei&acl:consumerKey=9093e1c99dece142359d928c738beac85f74cd44e53fd05afd704cb57518d09c", true);
+    r1.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:BusstopPole?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
     r1.send();
   });
 }
@@ -36,14 +41,14 @@ function getBuss(){
       if (e.target.status == 200 && e.target.responseText) {
         const json = JSON.parse(e.target.responseText);
         for (let i = 0; i < json.length; i++) {
-          if (bpm.has(json[i]["odpt:toBusstopPole"])) {
+          if (bpm.has(json[i]["odpt:toBusstopPole"])) { // pole id
             let arr = bpm.get(json[i]["odpt:toBusstopPole"]);
             arr.push({
               endPole: json[i]["odpt:terminalBusstopPole"],
               occupancyStatus: json[i]["odpt:occupancyStatus"],
               fromPole: json[i]["odpt:fromBusstopPole"],
               fromPoleTime: json[i]["odpt:fromBusstopPoleTime"],
-              id: json[i]["owl:sameAs"],
+              id: json[i]["owl:sameAs"], // bus id
               nameJa: json[i]["odpt:note"],
               routePattern: json[i]["odpt:busroutePattern"],
             });
@@ -63,7 +68,7 @@ function getBuss(){
         return resolve(bpm);
       }
     });
-    r2.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Bus?odpt:operator=odpt.Operator:Toei&acl:consumerKey=9093e1c99dece142359d928c738beac85f74cd44e53fd05afd704cb57518d09c", true);
+    r2.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Bus?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
     r2.send();
   });
 }
@@ -88,39 +93,8 @@ function getCalendars() {
         return resolve(cl);
       }
     });
-    r3.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Calendar?odpt:operator=odpt.Operator:Toei&acl:consumerKey=9093e1c99dece142359d928c738beac85f74cd44e53fd05afd704cb57518d09c", true);
+    r3.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Calendar?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
     r3.send();
-  });
-}
-
-// time table
-// const ttm = new Map();
-function getTimeTable() {
-  return new Promise(resolve => {
-    let rr = [], i = 0;
-
-    bpm.forEach(v => {
-      for (let i = 0; i < v.length; i++) {
-        ttm.set(v[i]["routePattern"], []);
-      }
-    });
-    ttm.forEach((v, k, m) => {
-
-      rr[i] = new XMLHttpRequest();
-      rr[i].open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusTimetable?odpt:operator=odpt.Operator:Toei&odpt:busroutePattern=${k}&acl:consumerKey=9093e1c99dece142359d928c738beac85f74cd44e53fd05afd704cb57518d09c`, true);
-      rr[i].addEventListener("load", e => {
-        if (e.target.status == 200 && e.target.responseText) {
-          const json = JSON.parse(e.target.responseText);
-          for (let i = 0; i < cl.length; i++) {
-
-          }
-          // TODO
-        }
-      });
-      rr[i].send();
-      i++;
-    });
-    return resolve(ttm);
   });
 }
 
@@ -132,20 +106,54 @@ function compareLatLng(v1, v2) {
 const ttm = new Map();
 function getTimetables(pos) {
   return new Promise(resolve => {
-    let cnt = 0;
-
+    // init map
     for (let i = 0; i < pl.length; i++) {
       if (compareLatLng(pos.lat, pl[i]["lat"])) {
         if (compareLatLng(pos.lng, pl[i]["lng"])) {
           let buss = bpm.get(pl[i]["id"]);
-          for (let j = 0; j < buss.length; j++) {
-            ttm.set(buss[j]["routePattern"], []);
+          if (buss) { // xxx
+            for (let j = 0; j < buss.length; j++) {
+              ttm.set(buss[j]["routePattern"], []);
+            }
+          } else {
+            // todo
           }
         }
       }
     }
-    // TODO
-    console.log(ttm)
+
+
+
+    // put data to map
+    ttm.set("odpt.BusroutePattern:Toei.Ki11Kou.72001.3", []); // [temp]
+    let rr = [], i = 0;
+    ttm.forEach(k => {
+      console.log("run")
+      rr[i] = new XMLHttpRequest();
+      rr[i].open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusTimetable?odpt:operator=odpt.Operator:Toei&odpt:busroutePattern=${k}&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793`, true);
+      rr[i].addEventListener("load", e => {
+        console.log(e)
+        if (e.target.status == 200 && e.target.responseText) {
+          const json = JSON.parse(e.target.responseText);
+          cl.forEach(calendar => {
+            json.forEach(timetable => {
+              if (calendar == timetable["odpt:calendar"]){
+                if (ttm.has(k)) { // xxx
+                  let arr = ttm.get(k);
+                  arr.push(timetable);
+                  ttm.set(k, arr);
+                } else {
+                  ttm.set(k, [timetable]);
+                  return;
+                }
+              }
+            });
+          });
+        }
+      });
+      rr[i].send();
+      i++;
+    });
     return resolve(ttm);
   });
 }
@@ -205,13 +213,25 @@ function drawPoles(pos, map) {
         });
 
         lm.set(m.getLabel(), {
-          // bus: bpm.get(pl[i]["id"]) || null, // no data in out of service
+          // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
           bus: bpm.get(pl[i]["id"]) || [{
-            endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",fromPole: "odpt.BusstopPole:Toei.Toranomon.1036.2",fromPoleTime: "2021-09-15T09:00:25+09:00",id: "odpt.Bus:Toei.T01.8501.2.F557",nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",occupancyStatus: undefined,
+            endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+            fromPole: "odpt.BusstopPole:Toei.Toranomon.1036.2",
+            fromPoleTime: "2021-09-15T09:00:25+09:00",
+            id: "odpt.Bus:Toei.T01.8501.2.F557",
+            nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+            occupancyStatus: undefined,
+            routePattern: "odpt.BusroutePattern:Toei.Ki11Kou.72001.3",
           },
           {
-            endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",fromPole: "odpt.BusstopPole:Toei.Toranomon.1036.2",fromPoleTime: "2021-09-15T09:00:25+09:00",id: "odpt.Bus:Toei.T01.8501.2.F557",nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",occupancyStatus: undefined,
-          }], // temporary: test data
+            endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+            fromPole: "odpt.BusstopPole:Toei.Toranomon.1036.2",
+            fromPoleTime: "2021-09-15T09:00:25+09:00",
+            id: "odpt.Bus:Toei.T01.8501.2.F557",
+            nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+            occupancyStatus: undefined,
+            routePattern: "odpt.BusroutePattern:Toei.Ki11Kou.72001.3",
+          }], // [temp] test data
           pole: {
             id: pl[i]["id"],
             name: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
@@ -255,6 +275,8 @@ function initMap() {
           map.setZoom(16);
         
           await getTimetables(pos);
+          console.log(ttm)
+          // TODO
           await drawPoles(pos, map);
         },
         () => {}
@@ -270,13 +292,11 @@ async function init() {
   await getBuss();
   await getCalendars();
   // await getTimeTable();
-  console.log("run2")
 }
 
 function main() {
   try {
     init();
-    console.log("run");
   } catch (err) {
     // todo
   }
