@@ -9,31 +9,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div class="container">
-      <div class="row mb-1">
-        <div class="col">
-          <div id="map" class="container"></div>
+    <div id="map"></div>
+    <div id="footer-menu" class="position-fixed bottom-0 w-100" style="background: white;">
+    <!-- <div id="footer-menu" class="w-100"> -->
+      <!-- <div class="position-absolute bottom-0 start-50 translate-middle-x w-100 h-100"> -->
+        <ul class="list-group w-100 h-100">
+          <li class="list-group-item active" aria-current="true">
+            <p id="pole">no data</p>
+            <button type="button" class="btn-close" aria-label="Close"></button>
+          </li>
+          
+          <div style="overflow-y: scroll;">
+
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
+          <li class="list-group-item">
+            <img src="./bus_18.svg" alt="busicon" width="32" height="32">
+            no data
+            <span class="badge bg-primary">あと0分</span>
+          </li>
         </div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div class="card text-truncate">
-            <div class="card-header">
-              <p class="h4" id="pole">
-                IHI前
-              </p>
-            </div>
-            <ul class="list-group" id="bus">
-              <li class="list-group-item">
-                  <p class="h6 text-wrap">
-                   no data
-                    <span class="badge bg-primary">約XX分後</span>
-                  </p>
-              </li>
-            </ul>
-          </div>  
-        </div>
-      </div>
+        </ul>
+
     </div>
     <script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXydkHxJhl2PO7_3-xnEHihJGYkPjWcbk&callback=initMap&libraries=&v=weekly"
