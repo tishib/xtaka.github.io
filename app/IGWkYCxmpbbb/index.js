@@ -142,14 +142,6 @@ function getTimetables(pos) {
               if (calendar == timetable["odpt:calendar"]){
                 ttm.set(k, [timetable]);
                 return;
-                if (ttm.has(k)) { // xxx
-                  let arr = ttm.get(k);
-                  arr.push(timetable);
-                  ttm.set(k, arr);
-                } else {
-                  
-                  return;
-                }
               }
             });
           });
@@ -185,16 +177,18 @@ function calTime(ttm, busData) {
   return (new Date(`01 Jan 1970 ${toTime}:00 GMT`).getMinutes() - new Date(`01 Jan 1970 ${fromTime}:00 GMT`).getMinutes()) || -1;
 }
 
-var toggleFlag = false;
-function toggleFooterMenu() {
-
-  if (toggleFlag) {
-    toggleFlag = false;
-    document.getElementById("footer-menu").style.height = "0px";
-  } else {
-    console.log("run")
-    toggleFlag = true;
+var openFlag = false;
+function openFooterMenu() {
+  if (!openFlag) {
     document.getElementById("footer-menu").style.height = "300px";
+    openFlag = true;
+  }
+}
+
+function closeFooterMenu() {
+  if (openFlag) {
+    document.getElementById("footer-menu").style.height = "0px";
+    openFlag = false;
   }
 }
 
@@ -205,11 +199,13 @@ function drawPoles(pos, map) {
   const lm = new Map(); // label map
   const PREFIX = "xxx"; // todo
   let ind = 0;
-  
+
+  // marker of pole
   for (let i = 0; i < pl.length; i++) {
     if (crrLat == Math.floor((pl[i]["lat"] * 100)) / 100) {
       if (crrLng == Math.floor((pl[i]["lng"] * 100)) / 100) {
         let m = new google.maps.Marker({
+          animation: google.maps.Animation.DROP,
           clickable: true,
           cursor: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
           label: labels[ind++ % labels.length],
@@ -220,39 +216,54 @@ function drawPoles(pos, map) {
         });
 
         m.addListener("click", () => {
-          const poleName = lm.get(m.getLabel())["pole"]["name"];
+          const poleName = `[${m.getLabel()}] ${lm.get(m.getLabel())["pole"]["name"]}`;
           const busDatas = lm.get(m.getLabel())["bus"];
 
           document.getElementById("pole").innerText = poleName;
 
-          // if (busDatas) {
-          //   let parent = document.getElementById("bus");
-          //   while (parent.firstChild) {
-          //     parent.removeChild(parent.firstChild);
-          //   }
+          if (busDatas) {
+            let parent = document.getElementById("list-bus");
+            while (parent.firstChild) {
+              parent.removeChild(parent.firstChild);
+            }
 
-          //   for (let i = 0; i < busDatas.length; i++) {
-          //     let li = document.createElement("li");
-          //     let p = document.createElement("p");
-          //     let span = document.createElement("span");
-          //     let time = calTime(ttm, busDatas[i], poleName);
-       
-          //     li.setAttribute("class", "list-group-item");
-          //     p.setAttribute("class", "h6 text-warp"); // todo
-          //     p.innerText = busDatas[i]["nameJa"];
-          //     p.id = `${PREFIX}-${busDatas[i]["id"]}`;
-          //     span.setAttribute("class", "badge bg-primary");
-          //     span.innerText = `あと${time}分`;
+            // [todo] sort fot busDatas
 
-          //     li.appendChild(p);
-          //     p.appendChild(span);
+            busDatas.forEach(item => {
+              let li = document.createElement("li");
+              let img = document.createElement("img");
+              let p = document.createElement("p");
+              let span = document.createElement("span");
+              let t = calTime(ttm, item, poleName);
 
-          //     document.getElementById("bus").appendChild(li);
-          //   }
-          // }
+              li.setAttribute("class", "list-group-item");
+              img.setAttribute("src", "./icon_bus_18.svg");
+              img.setAttribute("alt", "busIcon");
+              img.setAttribute("width", "32");
+              img.setAttribute("height", "32");
+              p.setAttribute("class", "h6 text-wrap");
+              p.innerText = item["nameJa"];
+              p.id = `${PREFIX}-${item["id"]}`;
+              span.setAttribute("class", "badge bg-primary");
+              span.innerText = `あと${t}分`;
 
-          toggleFooterMenu();
+              parent.appendChild(li);
+              li.appendChild(img);
+              li.appendChild(p);
+              p.appendChild(span);
+            });
+
+            openFooterMenu();
+
+            // [todo] animate a pole icon
+            // if (m.getAnimation() != null) {
+            //   m.setAnimation(null);
+            // } else {
+            //   m.setAnimation(google.maps.Animation.BOUNCE);
+            // }
+          }
         });
+
         lm.set(m.getLabel(), {
           // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
           bus: bpm.get(pl[i]["id"]) || [{
@@ -273,6 +284,19 @@ function drawPoles(pos, map) {
       }
     }
   }
+
+  // marker of my location
+  let image = {
+    url: "./icon_loc_20px_250ms.gif",
+  };
+  new google.maps.Marker({
+    position: {lat: pos.lat, lng: pos.lng},
+    map,
+    icon: image,
+  });
+
+  // close button
+  document.getElementById("btn-close").addEventListener("click", closeFooterMenu); // xxx
 }
 
 function initMap() {
@@ -290,8 +314,10 @@ function initMap() {
   });
   const locationButton = document.createElement("button");
 
-  locationButton.textContent = "Current Location";
+  locationButton.textContent = "現在位置";
+  locationButton.setAttribute("class", "btn btn-light shadow-sm p-3 mb-5 bg-white rounded");
   locationButton.classList.add("custom-map-control-button");
+
 
   map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
 

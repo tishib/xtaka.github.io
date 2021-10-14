@@ -1,7 +1,18 @@
 /* Set the size of the div element that contains the map */
 #map {
-  height: 400px;
-    /* The height is 400 pixels */
-      width: 100%;
-        /* The width is the width of the web page */
+  height: 100%;
+  /* The height is 400 pixels */
+  width: 100%;
+  /* The width is the width of the web page */
+}
+
+html,
+body {
+  height: 100%;
+}
+
+#footer-menu {
+  height: 0px;
+  transition: height 0.5s;
+  transition-timing-function: ease;
 }
