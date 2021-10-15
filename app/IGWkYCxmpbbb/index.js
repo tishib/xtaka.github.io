@@ -42,7 +42,6 @@ function getBuss(){
     r2.addEventListener("load", e => {
       if (e.target.status == 200 && e.target.responseText) {
         const json = JSON.parse(e.target.responseText);
-        console.log(json)
         for (let i = 0; i < json.length; i++) {
           if (bpm.has(json[i]["odpt:toBusstopPole"])) { // pole id
             let arr = bpm.get(json[i]["odpt:toBusstopPole"]);
@@ -159,21 +158,29 @@ if (navigator.language) {
   usrLang = navigator.language;
 }
 
-const lut = new Map(); // todo
-function calTime(ttm, busData) {
-  let from = busData["fromPole"];
-  let to = busData["toPole"];
-  let fromTime = "";
-  let toTime = "";
+function getRTofTimetable(ttm, busData) {
+  let d = 0; // departure time
+  let a = 0; // arrival time
   let timetable = ttm.get(busData["routePattern"]);
+
   if (timetable[0]) {
     timetable[0]["odpt:busTimetableObject"].forEach(item => {
-      if (item["odpt:busstopPole"] == from) fromTime = item["odpt:departureTime"];
-      if (item["odpt:busstopPole"] == to) toTime = item["odpt:arrivalTime"];
-      if (fromTime && toTime) return;
+      if (item["odpt:busstopPole"] == busData["fromPole"]) d = item["odpt:departureTime"];
+      if (item["odpt:busstopPole"] == busData["toPole"]) a = item["odpt:arrivalTime"];
+      if (d && a) return;
     });
   }
-  return (new Date(`01 Jan 1970 ${toTime}:00 GMT`).getMinutes() - new Date(`01 Jan 1970 ${fromTime}:00 GMT`).getMinutes()) || -1;
+  return (new Date(`01 Jan 1970 ${a}:00 GMT`).getMinutes() - new Date(`01 Jan 1970 ${d}:00 GMT`).getMinutes()) || -1;
+}
+
+function getRTofCurrent(busData) {
+  let diff = (Date.now() - new Date(busData["fromPoleTime"]));
+  return new Date(diff).getMinutes();
+}
+
+const lut = new Map(); // todo
+function calRemainingTime(ttm, busData) {
+  return (getRTofTimetable(ttm, busData) - getRTofCurrent(busData));
 }
 
 var openFlag = false;
@@ -207,6 +214,7 @@ function drawPoles(pos, map) {
     scale: 0.075,
     anchor: new google.maps.Point(-1, -1),
   };
+
   // marker of pole
   for (let i = 0; i < pl.length; i++) {
     if (crrLat == Math.floor((pl[i]["lat"] * 100)) / 100) {
@@ -242,7 +250,7 @@ function drawPoles(pos, map) {
               let img = document.createElement("img");
               let p = document.createElement("p");
               let span = document.createElement("span");
-              let t = calTime(ttm, item, poleName);
+              let t = calRemainingTime(ttm, item, poleName);
 
               li.setAttribute("class", "list-group-item");
               img.setAttribute("src", "./icon_bus_18.svg");
@@ -252,7 +260,7 @@ function drawPoles(pos, map) {
               p.setAttribute("class", "h6 text-wrap");
               p.innerText = item["nameJa"];
               p.id = `${PREFIX}-${item["id"]}`;
-              span.setAttribute("class", "badge bg-primary");
+              span.setAttribute("class", (t > 1 ? "badge bg-primary" : "badge bg-danger"));
               span.innerText = `あと${t}分`;
 
               parent.appendChild(li);
@@ -274,16 +282,48 @@ function drawPoles(pos, map) {
 
         lm.set(m.getLabel(), {
           // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
-          bus: bpm.get(pl[i]["id"]) || [{
-            endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-            fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-            fromPoleTime: "2021-09-15T09:00:25+09:00",
-            id: "odpt.Bus:Toei.T01.8501.2.F557",
-            nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-            occupancyStatus: undefined,
-            routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-            toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-          }], // [temp] test data
+          bus: bpm.get(pl[i]["id"]) || [
+            {
+              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes() - 2}:25+09:00`,
+              id: "odpt.Bus:Toei.T01.8501.2.F557",
+              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+              occupancyStatus: undefined,
+              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+            },
+            {
+              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+              id: "odpt.Bus:Toei.T01.8501.2.F557",
+              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+              occupancyStatus: undefined,
+              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+            },
+            {
+              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+              id: "odpt.Bus:Toei.T01.8501.2.F557",
+              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+              occupancyStatus: undefined,
+              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+            },
+            {
+              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+              id: "odpt.Bus:Toei.T01.8501.2.F557",
+              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+              occupancyStatus: undefined,
+              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+            },
+          ], // [temp] test data
           pole: {
             id: pl[i]["id"],
             name: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
