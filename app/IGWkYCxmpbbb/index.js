@@ -42,6 +42,7 @@ function getBuss(){
     r2.addEventListener("load", e => {
       if (e.target.status == 200 && e.target.responseText) {
         const json = JSON.parse(e.target.responseText);
+        console.log(json)
         for (let i = 0; i < json.length; i++) {
           if (bpm.has(json[i]["odpt:toBusstopPole"])) { // pole id
             let arr = bpm.get(json[i]["odpt:toBusstopPole"]);
@@ -126,8 +127,6 @@ function getTimetables(pos) {
       }
     }
 
-
-
     // put data to map
     ttm.set("odpt.BusroutePattern:Toei.T01.8501.1"); // [temp]
     let rr = [], i = 0;
@@ -199,7 +198,15 @@ function drawPoles(pos, map) {
   const lm = new Map(); // label map
   const PREFIX = "xxx"; // todo
   let ind = 0;
-
+  let svg = {
+    path: "M192 0C85.97 0 0 85.97 0 192c0 77.41 26.97 99.03 172.3 309.7c9.531 13.77 29.91 13.77 39.44 0C357 291 384 269.4 384 192C384 85.97 298 0 192 0zM192 271.1c-44.13 0-80-35.88-80-80S147.9 111.1 192 111.1s80 35.88 80 80S236.1 271.1 192 271.1z",
+    fillColor: "blue",
+    fillOpacity: 1,
+    strokeWeight: 0,
+    rotation: 0,
+    scale: 0.075,
+    anchor: new google.maps.Point(-1, -1),
+  };
   // marker of pole
   for (let i = 0; i < pl.length; i++) {
     if (crrLat == Math.floor((pl[i]["lat"] * 100)) / 100) {
@@ -213,6 +220,7 @@ function drawPoles(pos, map) {
           position: {lat: pl[i]["lat"], lng: pl[i]["lng"]},
           title: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
           visible: true,
+          // icon: svg, // [todo] wrong a position of label
         });
 
         m.addListener("click", () => {
@@ -314,13 +322,9 @@ function initMap() {
   });
   const locationButton = document.createElement("button");
 
-  locationButton.textContent = "現在位置";
+  locationButton.textContent = "近くのバス停を検索";
   locationButton.setAttribute("class", "btn btn-light shadow-sm p-3 mb-5 bg-white rounded");
   locationButton.classList.add("custom-map-control-button");
-
-
-  map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
-
   locationButton.addEventListener("click", () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -343,13 +347,14 @@ function initMap() {
       // doesn't support Geolocation
     }
   });
+  
+  map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
 }
 
 async function init() {
   await getPoles();
   await getBuss();
   await getCalendars();
-  // await getTimeTable();
 }
 
 function main() {
@@ -359,4 +364,5 @@ function main() {
     // todo
   }
 }
+
 main();
