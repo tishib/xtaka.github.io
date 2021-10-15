@@ -232,6 +232,7 @@ function drawPoles(pos, map) {
         });
 
         m.addListener("click", () => {
+
           const poleName = `[${m.getLabel()}] ${lm.get(m.getLabel())["pole"]["name"]}`;
           const busDatas = lm.get(m.getLabel())["bus"];
 
@@ -269,7 +270,6 @@ function drawPoles(pos, map) {
               p.appendChild(span);
             });
 
-            openFooterMenu();
 
             // [todo] animate a pole icon
             // if (m.getAnimation() != null) {
@@ -278,52 +278,54 @@ function drawPoles(pos, map) {
             //   m.setAnimation(google.maps.Animation.BOUNCE);
             // }
           }
+          openFooterMenu();
         });
 
         lm.set(m.getLabel(), {
           // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
-          bus: bpm.get(pl[i]["id"]) || [
-            {
-              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes() - 2}:25+09:00`,
-              id: "odpt.Bus:Toei.T01.8501.2.F557",
-              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-              occupancyStatus: undefined,
-              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-            },
-            {
-              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-              id: "odpt.Bus:Toei.T01.8501.2.F557",
-              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-              occupancyStatus: undefined,
-              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-            },
-            {
-              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-              id: "odpt.Bus:Toei.T01.8501.2.F557",
-              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-              occupancyStatus: undefined,
-              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-            },
-            {
-              endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-              fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-              fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-              id: "odpt.Bus:Toei.T01.8501.2.F557",
-              nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-              occupancyStatus: undefined,
-              routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-              toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-            },
-          ], // [temp] test data
+          bus: bpm.get(pl[i]["id"]),
+          // || [
+          //   {
+          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes() - 2}:25+09:00`,
+          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
+          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+          //     occupancyStatus: undefined,
+          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+          //   },
+          //   {
+          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
+          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+          //     occupancyStatus: undefined,
+          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+          //   },
+          //   {
+          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
+          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+          //     occupancyStatus: undefined,
+          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+          //   },
+          //   {
+          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
+          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
+          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
+          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
+          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
+          //     occupancyStatus: undefined,
+          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
+          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
+          //   },
+          // ], // [temp] test data
           pole: {
             id: pl[i]["id"],
             name: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
@@ -374,7 +376,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          pos.lat = 35.6812; pos.lng = 139.7671; // [temp] set to the location of tokyo station.
+          // pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
