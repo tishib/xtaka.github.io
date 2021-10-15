@@ -356,7 +356,7 @@ function initMap() {
     fullscreenControl: false,
     zoomControl: true,
     zoomControlOptions: {
-      position: google.maps.ControlPosition.TOP_RIGHT,
+      position: google.maps.ControlPosition.RIGHT_CENTER,
     },
     disableDefaultUI: true,
   });
