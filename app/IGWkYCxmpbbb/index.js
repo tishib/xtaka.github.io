@@ -9,6 +9,7 @@
 
 // import test from "./mock.js"; // todo CORS
 
+const X_ACL_CONSUMERKEY = "8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793";
 
 // pole
 const pl = []; // pole list
@@ -29,7 +30,7 @@ function getPoles() {
         return resolve(pl);
       }
     });
-    r1.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:BusstopPole?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
+    r1.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusstopPole?odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
     r1.send();
   });
 }
@@ -72,7 +73,7 @@ function getBuss(){
         return resolve(bpm);
       }
     });
-    r2.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Bus?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
+    r2.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:Bus?odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
     r2.send();
   });
 }
@@ -97,7 +98,7 @@ function getCalendars() {
         return resolve(cl);
       }
     });
-    r3.open("GET", "https://api-tokyochallenge.odpt.org/api/v4/odpt:Calendar?odpt:operator=odpt.Operator:Toei&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793", true);
+    r3.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:Calendar?odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
     r3.send();
   });
 }
@@ -131,7 +132,7 @@ function getTimetables(pos) {
     let rr = [], i = 0;
     ttm.forEach((v, k, m) => {
       rr[i] = new XMLHttpRequest();
-      rr[i].open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusTimetable?odpt:operator=odpt.Operator:Toei&odpt:busroutePattern=${k}&acl:consumerKey=8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793`, true);
+      rr[i].open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusTimetable?odpt:operator=odpt.Operator:Toei&odpt:busroutePattern=${k}&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
       rr[i].addEventListener("load", e => {
         if (e.target.status == 200 && e.target.responseText) {
           const json = JSON.parse(e.target.responseText);
