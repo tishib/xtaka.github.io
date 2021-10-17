@@ -395,7 +395,7 @@ function initMap() {
 }
 
 function openSideNav() {
-  document.getElementById("side-nav").style.width = "140px";
+  document.getElementById("side-nav").style.width = "150px";
 }
 
 function closeSideNav() {
