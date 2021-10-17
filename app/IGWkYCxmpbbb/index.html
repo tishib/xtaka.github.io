@@ -8,28 +8,28 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
     <!-- must be written BEFORE other stylesheet -->
-    <link rel="stylesheet" type="text/css" href="./style.css" />
-    <script src="./mock.js" type="module"></script>
-    <script src="./index.js"></script>
+    <link rel="stylesheet" type="text/css" href="./styles/style.css" />
+    <script src="./scripts/mock.js" type="module"></script>
+    <script src="./scripts/index.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
-    <div class="container position-fixed mt-2" style="z-index: 1!important; width: 50px;">
-      <img id="open-side-nav" src="./assets/icon_list.svg" style="width: 36px; height: 36px;">
+    <div id="header-left-menu" class="container position-fixed mt-2">
+      <img id="open-side-nav" src="./assets/icon_info.svg">
     </div>
     <div id="side-nav" class="nav-side position-fixed top-0 left-0 bg-light shadow rounded">
-      <p class="text-nowrap fs-6 mt-3 ms-3 fw-bold">サポート運行会社</p>
+      <p class="text-nowrap fs-6 mt-3 ms-3 fw-bold">対応路線</p>
       <ul class="list-group ms-4">
         <li>
           <p class="text-nowrap d-inline fs-6">
-            <img class="d-inline me-1" src="./assets/icon_toei.svg" style="width: 18px; height: 18px;">
+            <img id="img-icon-toei" class="d-inline me-1" src="./assets/icon_toei.svg">
             都営バス
           </p>
         </li>
       </ul>
     </div>  
     <div id="map"></div>
-    <div id="footer-menu" class="position-fixed bottom-0 w-100" style="background: white;">
+    <div id="footer-menu" class="position-fixed bottom-0 w-100">
       <ul class="list-group w-100 h-100">
         <li class="list-group-item active" aria-current="true">
           <div class="position-relative" style="height: 50px;">
@@ -39,7 +39,7 @@
             </div>
           </div>
         </li>
-        <div id="list-bus" style="overflow-y: scroll;"></div>
+        <div id="list-bus"></div>
       </ul>
     </div>
     <script

@@ -1,0 +1,56 @@
+/* Set the size of the div element that contains the map */
+#map {
+  height: 100%;
+  /* The height is 400 pixels */
+  width: 100%;
+  /* The width is the width of the web page */
+}
+
+html,
+body {
+  height: 100%;
+}
+
+#footer-menu {
+  height: 0px;
+  transition: height 0.5s;
+  transition-timing-function: ease;
+  background: white;
+}
+
+.nav-side {
+  height: 100%;
+  width: 0;
+  z-index: 2!important;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.nav-side ul li {
+  display: block;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+#open-sidenav-button{
+  z-index: 1;
+}
+
+#header-left-menu {
+  z-index: 1!important;
+  width: 50px;
+}
+
+#open-side-nav {
+  width: 24px;
+  height: 24px;
+}
+
+#img-icon-toei {
+  width: 18px;
+  height: 18px;
+}
+
+#list-bus {
+  overflow-y: scroll;
+}
