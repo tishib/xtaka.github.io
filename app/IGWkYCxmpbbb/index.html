@@ -14,6 +14,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div class="container position-fixed mt-2" style="z-index: 1!important;">
+      <img id="open-side-nav" src="./assets/icon_list.svg" style="width: 36px; height: 36px;">
+    </div>
+    <div id="side-nav" class="nav-side position-fixed top-0 left-0 bg-light shadow rounded">
+      <p class="text-nowrap fs-6 mt-3 ms-3 fw-bold">サポート運行会社</p>
+      <ul class="list-group ms-4">
+        <li>
+          <p class="text-nowrap d-inline">
+            <img class="d-inline me-1" src="./assets/icon_toei.svg" style="width: 18px; height: 18px;">
+            都営バス
+          </p>
+        </li>
+      </ul>
+    </div>  
     <div id="map"></div>
     <div id="footer-menu" class="position-fixed bottom-0 w-100" style="background: white;">
       <ul class="list-group w-100 h-100">

@@ -394,10 +394,24 @@ function initMap() {
   map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
 }
 
+function openSideNav() {
+  document.getElementById("side-nav").style.width = "140px";
+}
+
+function closeSideNav() {
+  document.getElementById("side-nav").style.width = "0px";
+}
+
 async function init() {
   await getPoles();
   await getBuss();
   await getCalendars();
+
+  // side nva open button
+  document.getElementById("open-side-nav").addEventListener("click", openSideNav);
+
+  // side nav
+  document.getElementById("side-nav").addEventListener("click", closeSideNav);
 }
 
 function main() {

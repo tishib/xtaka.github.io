@@ -16,3 +16,21 @@ body {
   transition: height 0.5s;
   transition-timing-function: ease;
 }
+
+.nav-side {
+  height: 100%;
+  width: 0;
+  z-index: 2!important;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+
+.nav-side ul li {
+  display: block;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+#open-sidenav-button{
+  z-index: 1;
+}
