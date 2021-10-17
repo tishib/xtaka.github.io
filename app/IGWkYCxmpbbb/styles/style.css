@@ -15,6 +15,7 @@ body {
   height: 0px;
   transition: height 0.5s;
   transition-timing-function: ease;
+  background: white;
 }
 
 .nav-side {
@@ -33,4 +34,23 @@ body {
 
 #open-sidenav-button{
   z-index: 1;
+}
+
+#header-left-menu {
+  z-index: 1!important;
+  width: 50px;
+}
+
+#open-side-nav {
+  width: 36px;
+  height: 36px;
+}
+
+#img-icon-toei {
+  width: 18px;
+  height: 18px;
+}
+
+#list-bus {
+  overflow-y: scroll;
 }

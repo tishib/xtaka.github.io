@@ -256,7 +256,7 @@ function drawPoles(pos, map) {
               let t = calRemainingTime(ttm, item, poleName);
 
               li.setAttribute("class", "list-group-item");
-              img.setAttribute("src", "./icon_bus_18.svg");
+              img.setAttribute("src", "./assets/icon_bus_18.svg");
               img.setAttribute("alt", "busIcon");
               img.setAttribute("width", "32");
               img.setAttribute("height", "32");
@@ -339,7 +339,7 @@ function drawPoles(pos, map) {
 
   // marker of my location
   let image = {
-    url: "./icon_loc_20px_250ms.gif",
+    url: "./assets/icon_loc_20px_250ms.gif",
   };
   new google.maps.Marker({
     position: {lat: pos.lat, lng: pos.lng},
@@ -379,7 +379,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
+          pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
