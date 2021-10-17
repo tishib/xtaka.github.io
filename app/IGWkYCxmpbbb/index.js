@@ -192,7 +192,8 @@ function openFooterMenu() {
   }
 }
 
-function closeFooterMenu() {
+function closeFooterMenu(evt) {
+  evt.preventDefault();
   if (openFlag) {
     document.getElementById("footer-menu").style.height = "0px";
     openFlag = false;
@@ -347,7 +348,7 @@ function drawPoles(pos, map) {
   });
 
   // close button
-  document.getElementById("btn-close").addEventListener("click", closeFooterMenu); // xxx
+  document.getElementById("btn-close").addEventListener("click", closeFooterMenu, false); // xxx
 }
 
 function initMap() {
@@ -368,7 +369,8 @@ function initMap() {
   locationButton.textContent = "近くのバス停を検索";
   locationButton.setAttribute("class", "btn btn-light shadow-sm p-3 mb-5 bg-white rounded");
   locationButton.classList.add("custom-map-control-button");
-  locationButton.addEventListener("click", () => {
+  locationButton.addEventListener("click", (evt) => {
+    evt.preventDefault();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -377,7 +379,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
+          pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
@@ -389,16 +391,18 @@ function initMap() {
     } else {
       // doesn't support Geolocation
     }
-  });
+  }, false);
   
   map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
 }
 
-function openSideNav() {
+function openSideNav(evt) {
+  evt.preventDefault();
   document.getElementById("side-nav").style.width = "150px";
 }
 
-function closeSideNav() {
+function closeSideNav(evt) {
+  evt.preventDefault();
   document.getElementById("side-nav").style.width = "0px";
 }
 
@@ -408,10 +412,12 @@ async function init() {
   await getCalendars();
 
   // side nva open button
-  document.getElementById("open-side-nav").addEventListener("click", openSideNav);
+  document.getElementById("open-side-nav").addEventListener("click", openSideNav, false);
 
   // side nav
-  document.getElementById("side-nav").addEventListener("click", closeSideNav);
+  document.getElementById("side-nav").addEventListener("click", closeSideNav, false);
+  document.getElementById("side-nav").addEventListener("touchmove", closeSideNav, false);
+  
 }
 
 function main() {
