@@ -379,7 +379,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
+          // pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
