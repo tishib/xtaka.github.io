@@ -10,6 +10,7 @@
 // import test from "./mock.js"; // todo CORS
 
 const X_ACL_CONSUMERKEY = "8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793";
+let debug = true;
 
 // pole
 const pl = []; // pole list
@@ -234,20 +235,18 @@ function drawPoles(pos, map) {
         });
 
         m.addListener("click", () => {
-
-          const poleName = `[${m.getLabel()}] ${lm.get(m.getLabel())["pole"]["name"]}`;
-          const busDatas = lm.get(m.getLabel())["bus"];
+          let poleName = `[${m.getLabel()}] ${lm.get(m.getLabel())["pole"]["name"]}`;
+          let parent = document.getElementById("list-bus");
+          let busDatas = lm.get(m.getLabel())["bus"];
 
           document.getElementById("pole").innerText = poleName;
 
+          while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+          }
+
           if (busDatas) {
-            let parent = document.getElementById("list-bus");
-            while (parent.firstChild) {
-              parent.removeChild(parent.firstChild);
-            }
-
             // [todo] sort fot busDatas
-
             busDatas.forEach(item => {
               let li = document.createElement("li");
               let img = document.createElement("img");
@@ -272,7 +271,6 @@ function drawPoles(pos, map) {
               p.appendChild(span);
             });
 
-
             // [todo] animate a pole icon
             // if (m.getAnimation() != null) {
             //   m.setAnimation(null);
@@ -286,48 +284,6 @@ function drawPoles(pos, map) {
         lm.set(m.getLabel(), {
           // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
           bus: bpm.get(pl[i]["id"]),
-          // || [
-          //   {
-          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes() - 2}:25+09:00`,
-          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
-          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-          //     occupancyStatus: undefined,
-          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-          //   },
-          //   {
-          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
-          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-          //     occupancyStatus: undefined,
-          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-          //   },
-          //   {
-          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
-          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-          //     occupancyStatus: undefined,
-          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-          //   },
-          //   {
-          //     endPole: "odpt.BusstopPole:Toei.ShibuyaStation.636.8",
-          //     fromPole: "odpt.BusstopPole:Toei.EXTheaterRoppongi.1613.3",
-          //     fromPoleTime: `2021-09-15T14:${new Date(Date.now()).getMinutes()}:25+09:00`,
-          //     id: "odpt.Bus:Toei.T01.8501.2.F557",
-          //     nameJa: "都０１（Ｔ０１） 新橋駅前→渋谷駅前 虎ノ門",
-          //     occupancyStatus: undefined,
-          //     routePattern: "odpt.BusroutePattern:Toei.T01.8501.1",
-          //     toPole: "odpt.BusstopPole:Toei.RoppongiStation.1609.3",
-          //   },
-          // ], // [temp] test data
           pole: {
             id: pl[i]["id"],
             name: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
@@ -379,7 +335,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
+          if (debug) pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
