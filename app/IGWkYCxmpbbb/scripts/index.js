@@ -181,7 +181,8 @@ function getRTofCurrent(busData) {
 
 const lut = new Map(); // todo
 function calRemainingTime(ttm, busData) {
-  return (getRTofTimetable(ttm, busData) - getRTofCurrent(busData));
+  const adjust = 1; // one minutes
+  return (getRTofTimetable(ttm, busData) - getRTofCurrent(busData) - adjust);
 }
 
 var openFlag = false;
@@ -310,6 +311,10 @@ function drawPoles(pos, map) {
 
   // close button
   document.getElementById("btn-close").addEventListener("click", closeFooterMenu, false); // xxx
+
+  // info as of
+  let now = Date.now();
+  document.getElementById("info-as-of").innerText = `${new Date(now).getHours()}:${new Date(now).getMinutes()} 時点`; // todo
 }
 
 function initMap() {
@@ -354,7 +359,7 @@ function initMap() {
     }
   }, false);
   
-  map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+  map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
 }
 
 function openSideNav(evt) {
