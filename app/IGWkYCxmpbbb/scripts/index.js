@@ -10,7 +10,6 @@
 // import test from "./mock.js"; // todo CORS
 
 const X_ACL_CONSUMERKEY = "8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793";
-let debug = true;
 
 // pole
 const pl = []; // pole list
@@ -262,7 +261,13 @@ function drawPoles(pos, map) {
               p.setAttribute("class", "h6 text-wrap");
               p.innerText = item["nameJa"];
               p.id = `${PREFIX}-${item["id"]}`;
-              span.setAttribute("class", (t > 1 ? "badge bg-primary" : "badge bg-danger"));
+              if (t > 1) {
+                span.setAttribute("class", "badge bg-primary");
+              } else if (t < 0) {
+                span.setAttribute("class", "badge bg-secondary");
+              } else {
+                span.setAttribute("class", "badge bg-danger");
+              }
               span.innerText = `あと${t}分`;
 
               parent.appendChild(li);
@@ -335,7 +340,7 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          if (debug) pos.lat = 35.6812; pos.lng = 139.7671; // [temp] tokyo station.
+          // pos.lat = 35.6812; pos.lng = 139.7671; // [debug] tokyo station.
           map.setCenter(pos);
           map.setZoom(16);
         
