@@ -35,7 +35,7 @@ const SVG_BEFORE = {
     };
 
 //
-// util
+// helper
 //
 function compLatLng(v1, v2) {
   return (Math.floor((v1 * 100)) / 100 == Math.floor((v2 * 100)) / 100 ? true : false);
