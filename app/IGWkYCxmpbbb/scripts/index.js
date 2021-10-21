@@ -396,6 +396,7 @@ function initMap() {
       position: google.maps.ControlPosition.RIGHT_TOP,
     },
     disableDefaultUI: true,
+    keyboardShortcuts: false,
   });
   const locationButton = document.createElement("button");
 
@@ -406,7 +407,7 @@ function initMap() {
 
 function openSideNav(evt) {
   evt.preventDefault();
-  document.getElementById("side-nav").style.width = "130px";
+  document.getElementById("side-nav").style.width = "135px";
 }
 
 function closeSideNav(evt) {
