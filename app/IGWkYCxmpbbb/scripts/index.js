@@ -407,7 +407,7 @@ function initMap() {
 
 function openSideNav(evt) {
   evt.preventDefault();
-  document.getElementById("side-nav").style.width = "150px";
+  document.getElementById("side-nav").style.width = "160px";
 }
 
 function closeSideNav(evt) {
