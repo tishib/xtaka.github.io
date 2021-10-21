@@ -4,14 +4,46 @@
  * - Rename for pl, bpm, lm easy to understand
  * TODO
  * - Error with Permissions-Policy header: Unrecognized feature: 'interest-cohort'.
- * - データダンプAPI (/v4/RDF_TYPE.json?
 */
 
 // import test from "./mock.js"; // todo CORS
 
+//
+// config
+//
 const X_ACL_CONSUMERKEY = '8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793';
-const TOKYO_STATION = {'lat': 35.6812, 'lng': 139.7671};
+const TOKYO_STATION_MARUNOUCHI = {'lat': 35.6822977, 'lng': 139.7650716};
+// marker
+const LABEL_ORIGIN = {"x": 8, "y": 4};
+const SVG_AFTER = {
+  path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
+  fillColor: "#008000",
+  fillOpacity: 1,
+  strokeWeight: 0,
+  rotation: 0,
+  scale: 5,
+  labelOrigin: null,
+  };
+const SVG_BEFORE = {
+    path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
+    fillColor: "#008000",
+    fillOpacity: 1,
+    strokeWeight: 0,
+    rotation: 0,
+    scale: 3.5,
+    labelOrigin: null,
+    };
 
+//
+// util
+//
+function compLatLng(v1, v2) {
+  return (Math.floor((v1 * 100)) / 100 == Math.floor((v2 * 100)) / 100 ? true : false);
+}
+
+//
+// app
+//
 
 // bus
 const bpm = new Map(); // bus of pole map
@@ -79,10 +111,6 @@ function fetchCalendarData() {
     r3.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:Calendar?odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
     r3.send();
   });
-}
-
-function compLatLng(v1, v2) {
-  return (Math.floor((v1 * 100)) / 100 == Math.floor((v2 * 100)) / 100 ? true : false);
 }
 
 // time tables
@@ -182,7 +210,7 @@ function getRTofCurrent(busData) {
 
 const lut = new Map(); // todo
 function calRemainingTime(ttm, busData) {
-  const adjust = 1; // one minutes
+  const adjust = 0; // for "time lag" between DB update and real world
   return (getRTofTimetable(ttm, busData) - getRTofCurrent(busData) - adjust);
 }
 
@@ -218,43 +246,48 @@ function drawLocMarker(pos, map, prev) {
   });
 }
 
-function drawPoleMarkers(pos, map, ttm, bpm) {
-  const crrLat = Math.floor((pos.lat * 100)) / 100; // xxx
-  const crrLng = Math.floor((pos.lng * 100)) / 100;
-  const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const lm = new Map(); // label map
-  const PREFIX = "xxx"; // todo
-  let ind = 0;
-  let svg = {
-    path: "M192 0C85.97 0 0 85.97 0 192c0 77.41 26.97 99.03 172.3 309.7c9.531 13.77 29.91 13.77 39.44 0C357 291 384 269.4 384 192C384 85.97 298 0 192 0zM192 271.1c-44.13 0-80-35.88-80-80S147.9 111.1 192 111.1s80 35.88 80 80S236.1 271.1 192 271.1z",
-    fillColor: "blue",
-    fillOpacity: 1,
-    strokeWeight: 0,
-    rotation: 0,
-    scale: 0.075,
-    anchor: new google.maps.Point(-1, -1),
-  };
+var prevPoleMarker = null;
+function toggleMarker(marker) {
+  SVG_BEFORE["labelOrigin"] = new google.maps.Point(LABEL_ORIGIN["x"], LABEL_ORIGIN["y"]); // todo
+  SVG_AFTER["labelOrigin"] = new google.maps.Point(LABEL_ORIGIN["x"], LABEL_ORIGIN["y"]); // todo
 
-  // marker of pole
+  if (prevPoleMarker) {
+    prevPoleMarker.setIcon(SVG_BEFORE);
+  }
+  marker.setIcon(SVG_AFTER);
+  prevPoleMarker = marker;
+}
+
+function drawPoleMarkers(pos, map, ttm, bpm) {
+  const LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lm = new Map(); // label map
+  const PREFIX = "pole";
+  let ind = 0;
+
+  // init marker
+  SVG_BEFORE["labelOrigin"] = new google.maps.Point(LABEL_ORIGIN["x"], LABEL_ORIGIN["y"]); // todo
   for (let i = 0; i < pl2.length; i++) {
-    if (crrLat == Math.floor((pl2[i]["lat"] * 100)) / 100) {
-      if (crrLng == Math.floor((pl2[i]["lng"] * 100)) / 100) {
+    if (compLatLng(pos.lat, pl2[i]["lat"]) || true) {
+      if (compLatLng(pos.lng, pl2[i]["lng"]) || true) {
         let m = new google.maps.Marker({
           animation: google.maps.Animation.DROP,
           clickable: true,
           cursor: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
-          label: labels[ind++ % labels.length],
+          label: {
+            text: LABELS[ind++ % LABELS.length],
+            color: "#ffffff"
+          },
           map: map,
           position: {lat: pl2[i]["lat"], lng: pl2[i]["lng"]},
           title: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           visible: true,
-          // icon: svg, // [todo] wrong a position of label
+          icon: SVG_BEFORE,
         });
 
-        m.addListener("click", () => {
-          let poleName = `[${m.getLabel()}] ${lm.get(m.getLabel())["pole"]["name"]}`;
+        m.addListener("click", (evt) => {
+          let poleName = `[${m.getLabel().text}] ${lm.get(m.getLabel().text)["pole"]["name"]}`;
           let parent = document.getElementById("list-bus");
-          let busDatas = lm.get(m.getLabel())["bus"];
+          let busDatas = lm.get(m.getLabel().text)["bus"];
 
           document.getElementById("pole").innerText = poleName;
 
@@ -293,18 +326,12 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               li.appendChild(p);
               p.appendChild(span);
             });
-
-            // [todo] animate a pole icon
-            // if (m.getAnimation() != null) {
-            //   m.setAnimation(null);
-            // } else {
-            //   m.setAnimation(google.maps.Animation.BOUNCE);
-            // }
           }
           openFooterMenu();
+          toggleMarker(m);
         });
 
-        lm.set(m.getLabel(), {
+        lm.set(m.getLabel().text, {
           // bus: bpm.get(pl2[i]["id"]) || null, // [todo] no data in out of service
           bus: bpm.get(pl2[i]["id"]),
           pole: {
@@ -341,7 +368,7 @@ function initLocBtn(locationButton, map) {
             lng: position.coords.longitude,
           };
 
-          pos.lat = TOKYO_STATION['lat']; pos.lng = TOKYO_STATION['lng']; // [debug] tokyo station.
+          // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(17);
         
@@ -359,7 +386,7 @@ function initLocBtn(locationButton, map) {
 
 function initMap() {
   const map = new google.maps.Map(document.getElementById("map"),{
-    center: {lat: TOKYO_STATION['lat'], lng: TOKYO_STATION['lng']},
+    center: {lat: TOKYO_STATION_MARUNOUCHI['lat'], lng: TOKYO_STATION_MARUNOUCHI['lng']},
     zoom: 11,
     streetViewControl: false, // map control
     rotateControl: false,
