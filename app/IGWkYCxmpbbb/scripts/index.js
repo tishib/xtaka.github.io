@@ -9,35 +9,13 @@
 
 // import test from "./mock.js"; // todo CORS
 
-const X_ACL_CONSUMERKEY = "8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793";
+const X_ACL_CONSUMERKEY = '8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793';
+const TOKYO_STATION = {'lat': 35.6812, 'lng': 139.7671};
 
-// pole
-const pl = []; // pole list
-function getPoles() {
-  const r1 = new XMLHttpRequest();
-  return new Promise(resolve => {
-    r1.addEventListener("load", e => {
-      if (e.target.status == 200 && e.target.responseText) {
-        const json = JSON.parse(e.target.responseText);
-        for (let i = 0; i < json.length; i++) {
-          pl.push({
-            id: json[i]["owl:sameAs"],
-            lat: json[i]["geo:lat"],
-            lng: json[i]["geo:long"],
-            name: json[i]["title"],
-          });
-        }
-        return resolve(pl);
-      }
-    });
-    r1.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/odpt:BusstopPole?odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
-    r1.send();
-  });
-}
 
 // bus
 const bpm = new Map(); // bus of pole map
-function getBuss(){
+function fetchBusData(){
   const r2 = new XMLHttpRequest();
   return new Promise(resolve => {
     r2.addEventListener("load", e => {
@@ -80,7 +58,7 @@ function getBuss(){
 
 // calendar
 const cl = []; // calendar id list
-function getCalendars() {
+function fetchCalendarData() {
   const r3 = new XMLHttpRequest();
   return new Promise(resolve => {
     r3.addEventListener("load", e => {
@@ -103,19 +81,19 @@ function getCalendars() {
   });
 }
 
-function compareLatLng(v1, v2) {
+function compLatLng(v1, v2) {
   return (Math.floor((v1 * 100)) / 100 == Math.floor((v2 * 100)) / 100 ? true : false);
 }
 
 // time tables
 const ttm = new Map();
-function getTimetables(pos) {
+function fetchTimeTableData(pos, bpm, ttm, pl2) {
   return new Promise(resolve => {
     // init map
-    for (let i = 0; i < pl.length; i++) {
-      if (compareLatLng(pos.lat, pl[i]["lat"])) {
-        if (compareLatLng(pos.lng, pl[i]["lng"])) {
-          let buss = bpm.get(pl[i]["id"]);
+    for (let i = 0; i < pl2.length; i++) { // TODO
+      if (compLatLng(pos.lat, pl2[i]["lat"])) {
+        if (compLatLng(pos.lng, pl2[i]["lng"])) {
+          let buss = bpm.get(pl2[i]["id"]);
           if (buss) { // xxx
             for (let j = 0; j < buss.length; j++) {
               ttm.set(buss[j]["routePattern"]);
@@ -128,7 +106,6 @@ function getTimetables(pos) {
     }
 
     // put data to map
-    ttm.set("odpt.BusroutePattern:Toei.T01.8501.1"); // [temp]
     let rr = [], i = 0;
     ttm.forEach((v, k, m) => {
       rr[i] = new XMLHttpRequest();
@@ -150,6 +127,30 @@ function getTimetables(pos) {
       i++;
     });
     return resolve(ttm);
+  });
+}
+
+// pole2
+const pl2 = [];
+function fetchPoleData2(pos) {
+  return new Promise(resolve => {
+    let r = new XMLHttpRequest();
+    r.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/places/odpt:BusstopPole?lon=${pos['lng']}&lat=${pos['lat']}&radius=300&odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
+    r.addEventListener('load', evt => {
+      if (evt.target.status == 200 && evt.target.responseText) {
+        let json = JSON.parse(evt.target.responseText);
+        for (let i = 0; i < json.length; i++) {
+          pl2.push({
+            id: json[i]["owl:sameAs"],
+            lat: json[i]["geo:lat"],
+            lng: json[i]["geo:long"],
+            name: json[i]["title"],
+          });
+        }
+        return resolve(pl2);
+      }
+    });
+    r.send();
   });
 }
 
@@ -201,7 +202,23 @@ function closeFooterMenu(evt) {
   }
 }
 
-function drawPoles(pos, map) {
+var prevLocMarker = null;
+function drawLocMarker(pos, map, prev) {
+  let image = {
+    url: "./assets/icon_loc_20px_250ms.gif",
+  };
+
+  if (prev) prev.visible = false;
+
+  prevLocMarker = new google.maps.Marker({
+    position: {lat: pos.lat, lng: pos.lng},
+    map,
+    icon: image,
+    optimized: false, // for gif icon
+  });
+}
+
+function drawPoleMarkers(pos, map, ttm, bpm) {
   const crrLat = Math.floor((pos.lat * 100)) / 100; // xxx
   const crrLng = Math.floor((pos.lng * 100)) / 100;
   const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -219,17 +236,17 @@ function drawPoles(pos, map) {
   };
 
   // marker of pole
-  for (let i = 0; i < pl.length; i++) {
-    if (crrLat == Math.floor((pl[i]["lat"] * 100)) / 100) {
-      if (crrLng == Math.floor((pl[i]["lng"] * 100)) / 100) {
+  for (let i = 0; i < pl2.length; i++) {
+    if (crrLat == Math.floor((pl2[i]["lat"] * 100)) / 100) {
+      if (crrLng == Math.floor((pl2[i]["lng"] * 100)) / 100) {
         let m = new google.maps.Marker({
           animation: google.maps.Animation.DROP,
           clickable: true,
-          cursor: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
+          cursor: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           label: labels[ind++ % labels.length],
           map: map,
-          position: {lat: pl[i]["lat"], lng: pl[i]["lng"]},
-          title: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
+          position: {lat: pl2[i]["lat"], lng: pl2[i]["lng"]},
+          title: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           visible: true,
           // icon: svg, // [todo] wrong a position of label
         });
@@ -288,26 +305,19 @@ function drawPoles(pos, map) {
         });
 
         lm.set(m.getLabel(), {
-          // bus: bpm.get(pl[i]["id"]) || null, // [todo] no data in out of service
-          bus: bpm.get(pl[i]["id"]),
+          // bus: bpm.get(pl2[i]["id"]) || null, // [todo] no data in out of service
+          bus: bpm.get(pl2[i]["id"]),
           pole: {
-            id: pl[i]["id"],
-            name: (usrLang == "ja") ? pl[i]["name"]["ja"] : pl[i]["name"]["en"],
+            id: pl2[i]["id"],
+            name: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           },
         });
       }
     }
   }
 
-  // marker of my location
-  let image = {
-    url: "./assets/icon_loc_20px_250ms.gif",
-  };
-  new google.maps.Marker({
-    position: {lat: pos.lat, lng: pos.lng},
-    map,
-    icon: image,
-  });
+  // draw current location marker
+  drawLocMarker(pos, map, prevLocMarker);
 
   // close button
   document.getElementById("btn-close").addEventListener("click", closeFooterMenu, false); // xxx
@@ -317,21 +327,7 @@ function drawPoles(pos, map) {
   document.getElementById("info-as-of").innerText = `${new Date(now).getHours()}:${new Date(now).getMinutes()} 時点`; // todo
 }
 
-function initMap() {
-  const map = new google.maps.Map(document.getElementById("map"),{
-    center: {lat: 35.6812, lng: 139.7671}, // tokyo station
-    zoom: 11,
-    streetViewControl: false, // map control
-    rotateControl: false,
-    fullscreenControl: false,
-    zoomControl: true,
-    zoomControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_TOP,
-    },
-    disableDefaultUI: true,
-  });
-  const locationButton = document.createElement("button");
-
+function initLocBtn(locationButton, map) {
   locationButton.textContent = "近くのバス停を検索";
   locationButton.setAttribute("class", "btn btn-light shadow-sm p-3 mb-5 bg-white rounded");
   locationButton.classList.add("custom-map-control-button");
@@ -345,12 +341,13 @@ function initMap() {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = 35.6812; pos.lng = 139.7671; // [debug] tokyo station.
+          pos.lat = TOKYO_STATION['lat']; pos.lng = TOKYO_STATION['lng']; // [debug] tokyo station.
           map.setCenter(pos);
-          map.setZoom(16);
+          map.setZoom(17);
         
-          await getTimetables(pos);
-          await drawPoles(pos, map);
+          await fetchPoleData2(pos);
+          await fetchTimeTableData(pos, bpm, ttm, pl2);
+          await drawPoleMarkers(pos, map, ttm, bpm);
         },
         () => {}
       );
@@ -358,6 +355,24 @@ function initMap() {
       // doesn't support Geolocation
     }
   }, false);
+}
+
+function initMap() {
+  const map = new google.maps.Map(document.getElementById("map"),{
+    center: {lat: TOKYO_STATION['lat'], lng: TOKYO_STATION['lng']},
+    zoom: 11,
+    streetViewControl: false, // map control
+    rotateControl: false,
+    fullscreenControl: false,
+    zoomControl: true,
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_TOP,
+    },
+    disableDefaultUI: true,
+  });
+  const locationButton = document.createElement("button");
+
+  initLocBtn(locationButton, map);
   
   map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
 }
@@ -372,18 +387,20 @@ function closeSideNav(evt) {
   document.getElementById("side-nav").style.width = "0px";
 }
 
-async function init() {
-  await getPoles();
-  await getBuss();
-  await getCalendars();
-
-  // side nva open button
+function initListener() {
+  // open side nav
   document.getElementById("open-side-nav").addEventListener("click", openSideNav, false);
 
-  // side nav
+  // close side nav
   document.getElementById("side-nav").addEventListener("click", closeSideNav, false);
   document.getElementById("side-nav").addEventListener("touchmove", closeSideNav, false);
-  
+}
+
+async function init() {
+  await fetchBusData();
+  await fetchCalendarData();
+
+  initListener();  
 }
 
 function main() {
