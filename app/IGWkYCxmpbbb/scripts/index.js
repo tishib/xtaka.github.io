@@ -387,30 +387,27 @@ function initLocBtn(locationButton, map) {
 }
 
 function getCurrentPosition(map) {
-  // return new Promise(resolve => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
 
-          // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
-          map.setCenter(pos);
-          map.setZoom(17);
-        
-          await fetchPoleData2(pos);
-          await fetchTimeTableData(pos, bpm, ttm, pl2);
-          await drawPoleMarkers(pos, map, ttm, bpm);
-        },
-        () => {}
-      );
-    } else {
-      // doesn't support Geolocation
-    }
-  //   return resolve();
-  // });
+        // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
+        map.setCenter(pos);
+        map.setZoom(17);
+      
+        await fetchPoleData2(pos);
+        await fetchTimeTableData(pos, bpm, ttm, pl2);
+        await drawPoleMarkers(pos, map, ttm, bpm);
+      },
+      () => {}
+    );
+  } else {
+    // doesn't support Geolocation
+  }
 }
 
 
@@ -430,9 +427,10 @@ function initMap() {
   });
   const locationButton = document.createElement("button");
 
-  // initLocBtn(locationButton, map);
-  // map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
-  getCurrentPosition(map);
+  initLocBtn(locationButton, map);
+  map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
+
+  // getCurrentPosition(map); // todo
 }
 
 function openSideNav(evt) {
