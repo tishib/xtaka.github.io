@@ -13,7 +13,6 @@
 //
 const X_ACL_CONSUMERKEY = '8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793';
 const TOKYO_STATION_MARUNOUCHI = {'lat': 35.6822977, 'lng': 139.7650716};
-// marker
 const LABEL_ORIGIN = {"x": 8, "y": 4};
 const SVG_AFTER = {
   path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
@@ -35,6 +34,22 @@ const SVG_BEFORE = {
     scale: 3.5,
     labelOrigin: null,
     };
+const JAEN = {
+  ja: {
+    findStation: '近くのバス停を検索',
+    crrTime: ' 時点',
+    remainTime: ['あと', '分'],
+    supportBus: '対応路線',
+    supportBusItems: ['都営バス'],
+  },
+  en: {
+    findStation: 'Find Bus Station',
+    crrTime: 'As of ',
+    remainTime: ['Arrive in ', ' min'],
+    supportBus: 'Support Bus',
+    supportBusItems: ['Toei'],
+  },
+};
 
 //
 // helper
@@ -55,6 +70,7 @@ function fetchBusData(){
     r2.addEventListener("load", e => {
       if (e.target.status == 200 && e.target.responseText) {
         const json = JSON.parse(e.target.responseText);
+        console.log(json)
         for (let i = 0; i < json.length; i++) {
           if (bpm.has(json[i]["odpt:toBusstopPole"])) { // pole id
             let arr = bpm.get(json[i]["odpt:toBusstopPole"]);
@@ -120,7 +136,7 @@ const ttm = new Map();
 function fetchTimeTableData(pos, bpm, ttm, pl2) {
   return new Promise(resolve => {
     // init map
-    for (let i = 0; i < pl2.length; i++) { // TODO
+    for (let i = 0; i < pl2.length; i++) { // todo
       if (compLatLng(pos.lat, pl2[i]["lat"])) {
         if (compLatLng(pos.lng, pl2[i]["lng"])) {
           let buss = bpm.get(pl2[i]["id"]);
@@ -312,7 +328,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               img.setAttribute("width", "32");
               img.setAttribute("height", "32");
               p.setAttribute("class", "h6 text-wrap");
-              p.innerText = item["nameJa"];
+              p.innerText = item["nameJa"]; // TODO
               p.id = `${PREFIX}-${item["id"]}`;
               if (t > 1) {
                 span.setAttribute("class", "badge bg-primary");
@@ -321,7 +337,10 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               } else {
                 span.setAttribute("class", "badge bg-danger");
               }
-              span.innerText = `あと${t}分`;
+              span.innerText = `
+                ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][0] : JAEN['en']['remainTime'][0])}
+                ${t}
+                ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][1] : JAEN['en']['remainTime'][1])}`;
 
               parent.appendChild(li);
               li.appendChild(img);
@@ -353,11 +372,11 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
 
   // info as of
   let now = Date.now();
-  document.getElementById("info-as-of").innerText = `${new Date(now).getHours().toString().padStart(2, "0")}:${new Date(now).getMinutes().toString().padStart(2, "0")} 時点`; // todo
+  document.getElementById("info-as-of").innerText = `${(usrLang == 'en-US' ? JAEN['en']['crrTime'] : '')} ${new Date(now).getHours().toString().padStart(2, "0")}:${new Date(now).getMinutes().toString().padStart(2, "0")} ${(usrLang == 'ja' ? JAEN['ja']['crrTime']: '')}`;
 }
 
 function initLocBtn(locationButton, map) {
-  locationButton.textContent = "近くのバス停を検索";
+  locationButton.textContent = `${(usrLang == 'ja' ? JAEN['ja']['findStation'] : JAEN['en']['findStation'])}`;
   locationButton.setAttribute("class", "btn btn-light shadow-sm p-3 mb-5 bg-white rounded");
   locationButton.classList.add("custom-map-control-button");
   locationButton.addEventListener("click", (evt) => {
@@ -386,31 +405,6 @@ function initLocBtn(locationButton, map) {
   }, false);
 }
 
-function getCurrentPosition(map) {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const pos = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-
-        // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
-        map.setCenter(pos);
-        map.setZoom(17);
-      
-        await fetchPoleData2(pos);
-        await fetchTimeTableData(pos, bpm, ttm, pl2);
-        await drawPoleMarkers(pos, map, ttm, bpm);
-      },
-      () => {}
-    );
-  } else {
-    // doesn't support Geolocation
-  }
-}
-
-
 function initMap() {
   const map = new google.maps.Map(document.getElementById("map"),{
     center: {lat: TOKYO_STATION_MARUNOUCHI['lat'], lng: TOKYO_STATION_MARUNOUCHI['lng']},
@@ -429,8 +423,6 @@ function initMap() {
 
   initLocBtn(locationButton, map);
   map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
-
-  // getCurrentPosition(map); // todo
 }
 
 function openSideNav(evt) {
@@ -452,11 +444,15 @@ function initListener() {
   document.getElementById("side-nav").addEventListener("touchmove", closeSideNav, false);
 }
 
+function initSideNav() {
+  document.getElementById('support-bus').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBus'] : JAEN['en']['supportBus']);
+  document.getElementById('support-bus-toei').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBusItems'][0] : JAEN['en']['supportBusItems'][0]);}
 
 async function init() {
   await fetchBusData();
   await fetchCalendarData();
-  initListener();  
+  initListener();
+  initSideNav();
 }
 
 function main() {
