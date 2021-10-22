@@ -352,7 +352,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
 
   // info as of
   let now = Date.now();
-  document.getElementById("info-as-of").innerText = `${new Date(now).getHours()}:${new Date(now).getMinutes()} 時点`; // todo
+  document.getElementById("info-as-of").innerText = `${new Date(now).getHours().toString().padStart(2, "0")}:${new Date(now).getMinutes().toString().padStart(2, "0")} 時点`; // todo
 }
 
 function initLocBtn(locationButton, map) {
@@ -369,7 +369,7 @@ function initLocBtn(locationButton, map) {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
+          //pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(17);
         
