@@ -54,3 +54,7 @@ body {
 #list-bus {
   overflow-y: scroll;
 }
+
+#pole {
+  max-width:90%;
+}

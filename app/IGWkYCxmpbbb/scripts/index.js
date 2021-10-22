@@ -286,7 +286,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
           icon: SVG_BEFORE,
         });
 
-        m.addListener("click", (evt) => {
+        m.addListener("click", () => {
           let poleName = `[${m.getLabel().text}] ${lm.get(m.getLabel().text)["pole"]["name"]}`;
           let parent = document.getElementById("list-bus");
           let busDatas = lm.get(m.getLabel().text)["bus"];
@@ -331,7 +331,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
           }
           openFooterMenu();
           toggleMarker(m);
-        });
+        }, false);
 
         lm.set(m.getLabel().text, {
           // bus: bpm.get(pl2[i]["id"]) || null, // [todo] no data in out of service
@@ -386,6 +386,34 @@ function initLocBtn(locationButton, map) {
   }, false);
 }
 
+function getCurrentPosition(map) {
+  // return new Promise(resolve => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
+          map.setCenter(pos);
+          map.setZoom(17);
+        
+          await fetchPoleData2(pos);
+          await fetchTimeTableData(pos, bpm, ttm, pl2);
+          await drawPoleMarkers(pos, map, ttm, bpm);
+        },
+        () => {}
+      );
+    } else {
+      // doesn't support Geolocation
+    }
+  //   return resolve();
+  // });
+}
+
+
 function initMap() {
   const map = new google.maps.Map(document.getElementById("map"),{
     center: {lat: TOKYO_STATION_MARUNOUCHI['lat'], lng: TOKYO_STATION_MARUNOUCHI['lng']},
@@ -402,9 +430,9 @@ function initMap() {
   });
   const locationButton = document.createElement("button");
 
-  initLocBtn(locationButton, map);
-  
-  map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
+  // initLocBtn(locationButton, map);
+  // map.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(locationButton);
+  getCurrentPosition(map);
 }
 
 function openSideNav(evt) {
@@ -426,10 +454,10 @@ function initListener() {
   document.getElementById("side-nav").addEventListener("touchmove", closeSideNav, false);
 }
 
+
 async function init() {
   await fetchBusData();
   await fetchCalendarData();
-
   initListener();  
 }
 
