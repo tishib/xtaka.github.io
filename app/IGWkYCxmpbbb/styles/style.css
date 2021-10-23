@@ -1,27 +1,20 @@
-/* Set the size of the div element that contains the map */
-#map {
-  height: 100%;
-  /* The height is 400 pixels */
-  width: 100%;
-  /* The width is the width of the web page */
-}
-
 html,
 body {
   height: 100%;
 }
 
-#footer-menu {
-  height: 0px;
-  transition: height 0.5s;
-  transition-timing-function: ease;
-  background: white;
+:root {
+  --z-index-lv1: 1000!important; 
+  --z-index-lv2: 2000!important; 
+  --z-index-lv3: 3000!important; 
+  --z-index-lv4: 4000!important; 
+  --z-index-lv5: 5000!important; 
 }
 
 .nav-side {
   height: 100%;
   width: 0;
-  z-index: 2!important;
+  z-index: var(--z-index-lv2);
   overflow-x: hidden;
   transition: 0.5s;
 }
@@ -32,12 +25,23 @@ body {
   text-decoration: none;
 }
 
-#open-sidenav-button{
-  z-index: 1;
+/* Set the size of the div element that contains the map */
+#map {
+  height: 100%;
+  /* The height is 400 pixels */
+  width: 100%;
+  /* The width is the width of the web page */
+}
+
+#footer-menu {
+  height: 0px;
+  transition: height 0.5s;
+  transition-timing-function: ease;
+  background: white;
 }
 
 #header-left-menu {
-  z-index: 1!important;
+  z-index: var(--z-index-lv1);
   width: 50px;
 }
 

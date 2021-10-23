@@ -12,7 +12,8 @@
 // config
 //
 const X_ACL_CONSUMERKEY = '8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793';
-const TOKYO_STATION_MARUNOUCHI = {'lat': 35.6822977, 'lng': 139.7650716};
+const TOKYO_MARUNOUCHI = {'lat': 35.6822977, 'lng': 139.7650716};
+const SHINJUKU = {'lat': 35.690921, 'lng': 139.7002579};
 const LABEL_ORIGIN = {"x": 8, "y": 4};
 const SVG_AFTER = {
   path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
@@ -34,6 +35,12 @@ const SVG_BEFORE = {
     scale: 3.5,
     labelOrigin: null,
     };
+const PREFIX = "pole";
+const ZINDEX_LV = [1000, 2000, 3000, 4000, 5000]; // todo
+    
+//
+// intl
+//
 const JAEN = {
   ja: {
     findStation: '近くのバス停を検索',
@@ -45,7 +52,7 @@ const JAEN = {
   en: {
     findStation: 'Find Bus Station',
     crrTime: 'As of ',
-    remainTime: ['Arrive in ', ' min'],
+    remainTime: ['', 'min left'],
     supportBus: 'Support Bus',
     supportBusItems: ['Toei'],
   },
@@ -59,8 +66,49 @@ function compLatLng(v1, v2) {
 }
 
 //
+// dummy
+//
+function dummy1(parent) {
+  let li = document.createElement("li");
+  let img = document.createElement("img");
+  let p = document.createElement("p");
+  let span = document.createElement("span");
+  let t = 99;
+
+  li.setAttribute("class", "list-group-item");
+  img.setAttribute("src", "./assets/icon_bus_18.svg");
+  img.setAttribute("alt", "busIcon");
+  img.setAttribute("width", "32");
+  img.setAttribute("height", "32");
+  p.setAttribute("class", "text-truncate mb-0");
+  p.innerText = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX→XXXXXXXXXXXXXXXXXXXXX';
+  
+  if (t > 1) {
+    span.setAttribute("class", "badge bg-primary");
+  } else if (t < 0) {
+    span.setAttribute("class", "badge bg-secondary");
+  } else {
+    span.setAttribute("class", "badge bg-danger");
+  }
+  span.innerText = `${(usrLang == 'ja' ? JAEN['ja']['remainTime'][0] : JAEN['en']['remainTime'][0])} \
+    ${t} \
+    ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][1] : JAEN['en']['remainTime'][1])}`;
+
+  parent.appendChild(li);
+  li.appendChild(img);
+  li.appendChild(p);
+  li.appendChild(span);
+}
+
+//
 // app
 //
+function getToeiBusNameEn(json) {
+  let startPole = json['odpt:startingBusstopPole'].replaceAll('odpt.BusstopPole:Toei.', '');
+  let termPole = json['odpt:terminalBusstopPole'].replaceAll('odpt.BusstopPole:Toei.', '');
+  let busRoute = json['odpt:busroute'].replaceAll('odpt.Busroute:Toei.', '');
+  return `${busRoute} ${startPole.substring(0, startPole.indexOf('.'))}→${termPole.substring(0, termPole.indexOf('.'))}`;
+}
 
 // bus
 const bpm = new Map(); // bus of pole map
@@ -70,8 +118,8 @@ function fetchBusData(){
     r2.addEventListener("load", e => {
       if (e.target.status == 200 && e.target.responseText) {
         const json = JSON.parse(e.target.responseText);
-        console.log(json)
         for (let i = 0; i < json.length; i++) {
+          let busNameEn = getToeiBusNameEn(json[i]);
           if (bpm.has(json[i]["odpt:toBusstopPole"])) { // pole id
             let arr = bpm.get(json[i]["odpt:toBusstopPole"]);
             arr.push({
@@ -83,6 +131,7 @@ function fetchBusData(){
               nameJa: json[i]["odpt:note"],
               routePattern: json[i]["odpt:busroutePattern"],
               toPole: json[i]["odpt:toBusstopPole"],
+              nameEn: busNameEn,
             });
             bpm.set(json[i]["odpt:toBusstopPole"], arr);
           } else {
@@ -95,6 +144,7 @@ function fetchBusData(){
               nameJa: json[i]["odpt:note"],
               routePattern: json[i]["odpt:busroutePattern"],
               toPole: json[i]["odpt:toBusstopPole"],
+              nameEn: busNameEn,
             }]);
           }
         }
@@ -181,7 +231,7 @@ const pl2 = [];
 function fetchPoleData2(pos) {
   return new Promise(resolve => {
     let r = new XMLHttpRequest();
-    r.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/places/odpt:BusstopPole?lon=${pos['lng']}&lat=${pos['lat']}&radius=300&odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
+    r.open("GET", `https://api-tokyochallenge.odpt.org/api/v4/places/odpt:BusstopPole?lon=${pos['lng']}&lat=${pos['lat']}&radius=200&odpt:operator=odpt.Operator:Toei&acl:consumerKey=${X_ACL_CONSUMERKEY}`, true);
     r.addEventListener('load', evt => {
       if (evt.target.status == 200 && evt.target.responseText) {
         let json = JSON.parse(evt.target.responseText);
@@ -210,8 +260,7 @@ function getRTofTimetable(ttm, busData) {
   let d = 0; // departure time
   let a = 0; // arrival time
   let timetable = ttm.get(busData["routePattern"]);
-
-  if (timetable[0]) {
+  if (timetable) {
     timetable[0]["odpt:busTimetableObject"].forEach(item => {
       if (item["odpt:busstopPole"] == busData["fromPole"]) d = item["odpt:departureTime"];
       if (item["odpt:busstopPole"] == busData["toPole"]) a = item["odpt:arrivalTime"];
@@ -276,10 +325,10 @@ function toggleMarker(marker) {
   prevPoleMarker = marker;
 }
 
+
 function drawPoleMarkers(pos, map, ttm, bpm) {
   const LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lm = new Map(); // label map
-  const PREFIX = "pole";
   let ind = 0;
 
   // init marker
@@ -300,6 +349,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
           title: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           visible: true,
           icon: SVG_BEFORE,
+          zIndx: ZINDEX_LV[0],
         });
 
         m.addListener("click", () => {
@@ -312,6 +362,8 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
           while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
           }
+
+          // dummy1(parent);
 
           if (busDatas) {
             // [todo] sort fot busDatas
@@ -327,8 +379,8 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               img.setAttribute("alt", "busIcon");
               img.setAttribute("width", "32");
               img.setAttribute("height", "32");
-              p.setAttribute("class", "h6 text-wrap");
-              p.innerText = item["nameJa"]; // TODO
+              p.setAttribute("class", "text-truncate mb-0");
+              p.innerText = (usrLang == 'ja' ? item["nameJa"] : item["nameEn"]);
               p.id = `${PREFIX}-${item["id"]}`;
               if (t > 1) {
                 span.setAttribute("class", "badge bg-primary");
@@ -337,15 +389,14 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               } else {
                 span.setAttribute("class", "badge bg-danger");
               }
-              span.innerText = `
-                ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][0] : JAEN['en']['remainTime'][0])}
-                ${t}
+              span.innerText = `${(usrLang == 'ja' ? JAEN['ja']['remainTime'][0] : JAEN['en']['remainTime'][0])} \
+                ${t} \
                 ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][1] : JAEN['en']['remainTime'][1])}`;
 
               parent.appendChild(li);
               li.appendChild(img);
               li.appendChild(p);
-              p.appendChild(span);
+              li.appendChild(span);
             });
           }
           openFooterMenu();
@@ -372,7 +423,9 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
 
   // info as of
   let now = Date.now();
-  document.getElementById("info-as-of").innerText = `${(usrLang == 'en-US' ? JAEN['en']['crrTime'] : '')} ${new Date(now).getHours().toString().padStart(2, "0")}:${new Date(now).getMinutes().toString().padStart(2, "0")} ${(usrLang == 'ja' ? JAEN['ja']['crrTime']: '')}`;
+  document.getElementById("info-as-of").innerText = `${(usrLang == 'en-US' ? JAEN['en']['crrTime'] : '')}\
+    ${new Date(now).getHours().toString().padStart(2, "0")}:${new Date(now).getMinutes().toString().padStart(2, "0")}\
+    ${(usrLang == 'ja' ? JAEN['ja']['crrTime']: '')}`;
 }
 
 function initLocBtn(locationButton, map) {
@@ -389,7 +442,8 @@ function initLocBtn(locationButton, map) {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = TOKYO_STATION_MARUNOUCHI['lat']; pos.lng = TOKYO_STATION_MARUNOUCHI['lng']; // [temp] tokyo station.
+          // pos.lat = TOKYO_MARUNOUCHI['lat']; pos.lng = TOKYO_MARUNOUCHI['lng']; // [temp] tokyo station.
+          // pos.lat = SHINJUKU['lat']; pos.lng = SHINJUKU['lng']; // [temp] tokyo station.
           map.setCenter(pos);
           map.setZoom(17);
         
@@ -407,7 +461,7 @@ function initLocBtn(locationButton, map) {
 
 function initMap() {
   const map = new google.maps.Map(document.getElementById("map"),{
-    center: {lat: TOKYO_STATION_MARUNOUCHI['lat'], lng: TOKYO_STATION_MARUNOUCHI['lng']},
+    center: {lat: TOKYO_MARUNOUCHI['lat'], lng: TOKYO_MARUNOUCHI['lng']},
     zoom: 11,
     streetViewControl: false, // map control
     rotateControl: false,
@@ -445,8 +499,9 @@ function initListener() {
 }
 
 function initSideNav() {
-  document.getElementById('support-bus').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBus'] : JAEN['en']['supportBus']);
-  document.getElementById('support-bus-toei').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBusItems'][0] : JAEN['en']['supportBusItems'][0]);}
+  document.getElementById('support-bus-ope').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBus'] : JAEN['en']['supportBus']);
+  document.getElementById('support-bus-toei').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBusItems'][0] : JAEN['en']['supportBusItems'][0]);
+}
 
 async function init() {
   await fetchBusData();
