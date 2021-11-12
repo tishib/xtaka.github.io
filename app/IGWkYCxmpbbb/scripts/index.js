@@ -14,6 +14,7 @@
 const X_ACL_CONSUMERKEY = '8a65991fa76f15df8f4410b4a823c5cee45a5faa64a291d5194d4891f629d793';
 const TOKYO_MARUNOUCHI = {'lat': 35.6822977, 'lng': 139.7650716};
 const SHINJUKU = {'lat': 35.690921, 'lng': 139.7002579};
+const SHIBUYA = {'lat': 35.6592341, 'lng': 139.7000584};
 const LABEL_ORIGIN = {"x": 8, "y": 4};
 const SVG_AFTER = {
   path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
@@ -320,7 +321,7 @@ function closeFooterMenu(evt) {
 var prevLocMarker = null;
 function drawLocMarker(pos, map, prev) {
   let image = {
-    url: "./assets/icon_loc_20px_250ms.gif",
+    url: "./assets/icon_loc.gif",
   };
 
   if (prev) prev.visible = false;
@@ -354,7 +355,7 @@ function toggleMarker(marker) {
   prevPoleMarker = marker;
 }
 
-
+let prevMarkers = [];
 function drawPoleMarkers(pos, map, ttm, bpm) {
   const LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lm = new Map(); // label map
@@ -363,6 +364,13 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
   // init marker
   SVG_BEFORE["labelOrigin"] = new google.maps.Point(LABEL_ORIGIN["x"], LABEL_ORIGIN["y"]); // todo
   SVG_BEFORE2["labelOrigin"] = new google.maps.Point(LABEL_ORIGIN["x"], LABEL_ORIGIN["y"]); // todo
+
+  // remove previous markers
+  prevMarkers.forEach(m => {
+    m.setMap(null);
+    console.log("run")
+  });
+  prevMarkers = [];
   
   for (let i = 0; i < pl2.length; i++) {
     if (compLatLng(pos.lat, pl2[i]["lat"]) || true) {
@@ -446,6 +454,8 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
         if (bpm.get(pl2[i]["id"])) {
           m.set("isSvg2", 1);
         }
+
+        prevMarkers.push(m);
       }
     }
   }
@@ -477,8 +487,10 @@ function initLocBtn(locationButton, map) {
             lng: position.coords.longitude,
           };
 
-          // pos.lat = TOKYO_MARUNOUCHI['lat']; pos.lng = TOKYO_MARUNOUCHI['lng']; // [temp] tokyo station.
-          // pos.lat = SHINJUKU['lat']; pos.lng = SHINJUKU['lng']; // [temp] tokyo station.
+          // pos.lat = TOKYO_MARUNOUCHI['lat']; pos.lng = TOKYO_MARUNOUCHI['lng']; // temp
+          // pos.lat = SHINJUKU['lat']; pos.lng = SHINJUKU['lng']; // temp
+          // pos.lat = SHIBUYA['lat']; pos.lng = SHIBUYA['lng']; // temp
+          
           map.setCenter(pos);
           map.setZoom(17);
         
