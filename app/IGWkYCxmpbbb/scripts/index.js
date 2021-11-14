@@ -69,13 +69,15 @@ const JAEN = {
     remainTime: ['あと', '分'],
     supportBus: '対応路線',
     supportBusItems: ['都営バス'],
+    title: 'バスの到着時間がすぐに分かる - タイムリー',
   },
   en: {
     findStation: 'Find Bus Station',
     crrTime: 'As of ',
-    remainTime: ['', 'min left'],
+    remainTime: ['in', 'min'],
     supportBus: 'Support Bus',
     supportBusItems: ['Toei'],
+    title: 'Show the time of bus that will be arriving soon - TIMELY',
   },
 };
 
@@ -302,7 +304,7 @@ function getRTofCurrent(busData) {
 }
 
 const lut = new Map(); // todo
-function calRemainingTime(ttm, busData) {
+function calArriveTime(ttm, busData) {
   const adjust = 1; // for "time lag" between DB update and real world
   return (getRTofTimetable(ttm, busData) - getRTofCurrent(busData) - adjust);
 }
@@ -416,7 +418,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
               let img = document.createElement("img");
               let p = document.createElement("p");
               let span = document.createElement("span");
-              let t = calRemainingTime(ttm, item, poleName);
+              let t = calArriveTime(ttm, item, poleName);
 
               li.setAttribute("class", "list-group-item");
               img.setAttribute("src", "./assets/icon_bus_18.svg");
@@ -437,10 +439,12 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
                 ${t} \
                 ${(usrLang == 'ja' ? JAEN['ja']['remainTime'][1] : JAEN['en']['remainTime'][1])}`;
 
-              parent.appendChild(li);
-              li.appendChild(img);
-              li.appendChild(p);
-              li.appendChild(span);
+              if (t > -15) {
+                parent.appendChild(li);
+                li.appendChild(img);
+                li.appendChild(p);
+                li.appendChild(span);  
+              }
             });
           }
           openFooterMenu();
@@ -642,6 +646,8 @@ async function init() {
   await fetchCalendarData();
   initListener();
   initSideNav();
+  document.title = (usrLang == 'ja' ? JAEN['ja']['title'] : JAEN['en']['title']);
+
 }
 
 function main() {
