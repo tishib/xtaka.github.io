@@ -77,7 +77,7 @@ const JAEN = {
     remainTime: ['in', 'min'],
     supportBus: 'Support Bus',
     supportBusItems: ['Toei'],
-    title: 'Show the time of bus that will be arriving soon - TIMELY',
+    title: 'Show the time of bus that will be arriving soon - Timely',
   },
 };
 
