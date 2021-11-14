@@ -18,7 +18,7 @@ const SHIBUYA = {'lat': 35.6592341, 'lng': 139.7000584};
 const LABEL_ORIGIN = {"x": 8, "y": 4};
 const SVG_AFTER = {
   path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
-  fillColor: "#6c757d",
+  fillColor: (isDark() ? "#f8f9fa" : "#6c757d"),
   fillOpacity: 1,
   strokeWeight: 1,
   strokeColor: "#343a40",
@@ -28,7 +28,7 @@ const SVG_AFTER = {
   };
 const SVG_BEFORE = {
     path: "M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z",
-    fillColor: "#6c757d",
+    fillColor: (isDark() ? "#f8f9fa" : "#6c757d"),
     fillOpacity: 1,
     strokeWeight: 1,
     strokeColor: "#343a40",
@@ -60,7 +60,7 @@ const PREFIX = "pole";
 const ZINDEX_LV = [1000, 2000, 3000, 4000, 5000]; // todo
     
 //
-// intl
+// i11l
 //
 const JAEN = {
   ja: {
@@ -80,8 +80,13 @@ const JAEN = {
 };
 
 //
-// helper
+// util
 //
+function isDark() {
+  if (window.mediaMatch && !window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return false;
+  return true;
+}
+
 function compLatLng(v1, v2) {
   return (Math.floor((v1 * 100)) / 100 == Math.floor((v2 * 100)) / 100 ? true : false);
 }
@@ -381,7 +386,7 @@ function drawPoleMarkers(pos, map, ttm, bpm) {
           cursor: (usrLang == "ja") ? pl2[i]["name"]["ja"] : pl2[i]["name"]["en"],
           label: {
             text: LABELS[ind++ % LABELS.length],
-            color: "#ffffff"
+            color: (isDark() ? "#212529" : "#ffffff"),
           },
           map: map,
           position: {lat: pl2[i]["lat"], lng: pl2[i]["lng"]},
@@ -507,6 +512,86 @@ function initLocBtn(locationButton, map) {
 }
 
 function initMap() {
+  const dark = [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+          featureType: "administrative.locality",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#263c3f" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#6b9a76" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [{ color: "#38414e" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#212a37" }],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#746855" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#1f2835" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#f3d19c" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "geometry",
+          stylers: [{ color: "#2f3948" }],
+        },
+        {
+          featureType: "transit.station",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#17263c" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#515c6d" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.stroke",
+          stylers: [{ color: "#17263c" }],
+        },
+      ];
   const map = new google.maps.Map(document.getElementById("map"),{
     center: {lat: TOKYO_MARUNOUCHI['lat'], lng: TOKYO_MARUNOUCHI['lng']},
     zoom: 11,
@@ -519,6 +604,7 @@ function initMap() {
     },
     disableDefaultUI: true,
     keyboardShortcuts: false,
+    styles: (isDark() ? dark : []),
   });
   const locationButton = document.createElement("button");
 
@@ -548,6 +634,7 @@ function initListener() {
 function initSideNav() {
   document.getElementById('support-bus-ope').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBus'] : JAEN['en']['supportBus']);
   document.getElementById('support-bus-toei').innerText = (usrLang == 'ja' ? JAEN['ja']['supportBusItems'][0] : JAEN['en']['supportBusItems'][0]);
+  if (isDark()) document.getElementById('open-side-nav').style.color = '#f8f9fa';
 }
 
 async function init() {
