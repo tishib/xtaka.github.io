@@ -62,3 +62,11 @@ body {
 #pole {
   max-width:90%;
 }
+
+#footer-right {
+  z-index: var(--z-index-lv1);
+  width: 50px;
+}
+#footer-right a {
+  color: #212529;
+}
