@@ -16,7 +16,7 @@
   "os": "win32",
   "dependencies": {},
   "devDependencies": {
-    "express": "4.17.1",
+    "express": "4.17.3",
     "node": "12.7.0",
     "opn": "6.0.0",
     "path": "0.12.7"
