@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
   <body>
     <div id="setup">
       <div>
@@ -8,7 +11,7 @@
       <button id="submit">Create Problems</button>
     </div>
     <div id="running">
-      <div><p>current score: <span id="cur_score">0</span></p></div>
+      <div><p>current score: <span id="cur_score">0</span> / <span id="cur_ans_num">0</span></p></div>
       <div><p id="prob">Problem Statements</p></div>
       <ul>
         <li id="ans1" data-ans="">Answer1</li>
@@ -20,15 +23,13 @@
       <button id="exit">Exit</button>
     </div>
     <script>
-      function printf(somthing) {
-        console.log(somthing);
-      }
       const probObjList = [];
       const SETUP_ID = "setup";
       const SUBMIT_ID = "submit";
       const RUNNING_ID = "running";
       const PROB_DATA_ID = "prob_data";
       const CURRENT_SCORE_ID = "cur_score";
+      const CURRENT_ANS_NUM_ID = "cur_ans_num";
       const PROB_ID = "prob";
       const ANS1_ID = "ans1";
       const ANS2_ID = "ans2";
@@ -38,9 +39,14 @@
       const EXIT_ID = "exit";
       const abortController = new AbortController();
       const MAX_PROB_DATA_LEN = 1024 * 100;
+      const ANS_INDS = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
       let curScore = 0;
+      let curAnsNum = 0;
 
-      
+      // utility
+      function getRandInd(max) {
+        return Math.floor(Math.random() * max);
+      }
       function hideSetup() {
         document.getElementById(SETUP_ID).hidden = true;
       }
@@ -53,6 +59,21 @@
       function visibleRunning() {
         document.getElementById(RUNNING_ID).hidden = false;
       }
+      function drawCurrentScore() {
+        document.getElementById(CURRENT_SCORE_ID).innerText = ++curScore;
+      }
+      function resetCurrentScore() {
+        curScore = 0;
+        document.getElementById(CURRENT_SCORE_ID).innerText = curScore;
+      }
+      function drawCurrentAnsNum() {
+        document.getElementById(CURRENT_ANS_NUM_ID).innerText = ++curAnsNum;
+      }
+      function resetCurrentAnsNum() {
+        curAnsNum = 0;
+        document.getElementById(CURRENT_ANS_NUM_ID).innerText = curAnsNum;
+      }
+
       // setup
       function validate(rawData) {
         if (rawData.length > MAX_PROB_DATA_LEN)
@@ -86,7 +107,6 @@
           start = curData.indexOf('[');
           end = getNewLinePos(curData);
         }
-        // printf(probObjList)
       }
       function clearProbDataForm() {
         document.getElementById(PROB_DATA_ID).value = "";
@@ -110,17 +130,18 @@
 
         document.getElementById(SUBMIT_ID).addEventListener("click", onClickSubmit);
       }
+
       // exec
       function drawProb(inds) {
         let e = document.getElementById(PROB_ID);
-        let i = inds[0];
+        let randInd = getRandInd(inds.length);
+        let i = inds[randInd];
         e.innerText = probObjList[i].value;
         e.dataset.ans = probObjList[i].key;
       }
       function drawAnsList(inds) {
-        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
         for (let i = 0; i < 4; ++i) {
-          let e = document.getElementById(ansInds[i]);
+          let e = document.getElementById(ANS_INDS[i]);
           let prob = probObjList[inds[i]];
           e.innerText = prob.key;
           e.dataset.ans = prob.key;
@@ -136,7 +157,7 @@
         if (n < 4)
           return [];
         while (s.size < 4) {
-          let randInd = Math.floor(Math.random() * n);
+          let randInd = getRandInd(n);
           if (!s.has(randInd))
             s.add(randInd);
         }
@@ -144,54 +165,43 @@
       }
       function correct(id) {
         document.getElementById(id).style = "background: greenyellow;";
-        curScore++;
         drawCurrentScore();
       }
       function wrong(id) {
         document.getElementById(id).style = "background: orangered;";
       }
       function resetAllAnsStyle() {
-        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
         for (let i = 0; i < 4; ++i)
-          document.getElementById(ansInds[i]).style = "";
+          document.getElementById(ANS_INDS[i]).style = "";
       }
       function onClickAns(evt) {
-        printf(evt.target);
         let probAns = document.getElementById(PROB_ID).dataset.ans;
         if (evt.target.dataset.ans == probAns)
           correct(evt.target.id);
         else
           wrong(evt.target.id);
+        drawCurrentAnsNum();
       }
       function onClickNext() {
         let inds = getProbInds();
         resetAllAnsStyle();
         draw(inds);
       }
-      function drawCurrentScore() {
-        document.getElementById(CURRENT_SCORE_ID).innerText = curScore;
-      }
-      function resetCurrentScore() {
-        curScore = 0;
-        document.getElementById(CURRENT_SCORE_ID).innerText = curScore;
-      }
       function initExec() {
-        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
         let e = document.getElementById(NEXT_ID);
 
         for (let i = 0; i < 4; ++i) {
-          let e = document.getElementById(ansInds[i]);
+          let e = document.getElementById(ANS_INDS[i]);
           e.addEventListener("click", onClickAns);
         }
 
         e.addEventListener("click", onClickNext);
       }
+
       // exit
       function onClickExit() {
         visibleSetup();
         hideRunning();
-        // resetAllAnsStyle();
-        // resetCurrentScore();
         cleanup();
       }
       function initExit() {
@@ -203,9 +213,11 @@
       function cleanup() {
         resetAllAnsStyle();
         resetCurrentScore();
+        resetCurrentAnsNum();
         clearProbDataForm();
         clearProbObjList();
       }
+      
       function main() {
         initSetup();
         initExec();
