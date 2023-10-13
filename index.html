@@ -1,9 +1,217 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-  </head>
   <body>
-    <p>No contents yet...</p>
+    <div id="setup">
+      <div>
+        <textarea id="prob_data" data-ans=""></textarea>
+      </div>
+      <button id="submit">Create Problems</button>
+    </div>
+    <div id="running">
+      <div><p>current score: <span id="cur_score">0</span></p></div>
+      <div><p id="prob">Problem Statements</p></div>
+      <ul>
+        <li id="ans1" data-ans="">Answer1</li>
+        <li id="ans2" data-ans="">Answer2</li>
+        <li id="ans3" data-ans="">Answer3</li>
+        <li id="ans4" data-ans="">Answer4</li>
+      </ul>
+      <button id="next">Next</button>
+      <button id="exit">Exit</button>
+    </div>
+    <script>
+      function printf(somthing) {
+        console.log(somthing);
+      }
+      const probObjList = [];
+      const SETUP_ID = "setup";
+      const SUBMIT_ID = "submit";
+      const RUNNING_ID = "running";
+      const PROB_DATA_ID = "prob_data";
+      const CURRENT_SCORE_ID = "cur_score";
+      const PROB_ID = "prob";
+      const ANS1_ID = "ans1";
+      const ANS2_ID = "ans2";
+      const ANS3_ID = "ans3";
+      const ANS4_ID = "ans4";
+      const NEXT_ID = "next";
+      const EXIT_ID = "exit";
+      const abortController = new AbortController();
+      const MAX_PROB_DATA_LEN = 1024 * 100;
+      let curScore = 0;
+
+      
+      function hideSetup() {
+        document.getElementById(SETUP_ID).hidden = true;
+      }
+      function visibleSetup() {
+        document.getElementById(SETUP_ID).hidden = false;
+      }
+      function hideRunning() {
+        document.getElementById(RUNNING_ID).hidden = true;
+      }
+      function visibleRunning() {
+        document.getElementById(RUNNING_ID).hidden = false;
+      }
+      // setup
+      function validate(rawData) {
+        if (rawData.length > MAX_PROB_DATA_LEN)
+          return false;
+        if (rawData.length == 0)
+          return false;
+        return true;
+      }
+      function getNewLinePos(rawData) {
+        if (rawData.indexOf("\r\n") > -1)
+          return rawData.indexOf("\r\n");
+        if (rawData.indexOf("\n") > -1)
+          return rawData.indexOf("\n");
+        if (rawData.indexOf("\r") > -1)
+          return rawData.indexOf("\r");
+        return -1;
+      }
+      function parse(rawData) {
+        let start = rawData.indexOf('[');
+        let end = getNewLinePos(rawData);
+        let curData = rawData;
+        while (start > -1 && end > -1) {
+          let probStr = curData.substr(start, end);
+          if (probStr.indexOf(']') > -1) {
+            let key = probStr.substr(0, probStr.indexOf(']') + 1);
+            let value = probStr.substr(probStr.indexOf(']') + 1);
+            probObjList.push({key: key, value: value});
+          }
+
+          curData = curData.substr(end + 1, curData.length);
+          start = curData.indexOf('[');
+          end = getNewLinePos(curData);
+        }
+        // printf(probObjList)
+      }
+      function clearProbDataForm() {
+        document.getElementById(PROB_DATA_ID).value = "";
+      }
+      function onClickSubmit() {
+        let rawData = document.getElementById(PROB_DATA_ID).value;
+        if (validate(rawData)) {
+          parse(rawData);
+          hideSetup();
+          visibleRunning();
+
+          let inds = getProbInds();
+          draw(inds);
+
+          clearProbDataForm();
+        }
+      }
+      function initSetup() {
+        visibleSetup();
+        hideRunning();
+
+        document.getElementById(SUBMIT_ID).addEventListener("click", onClickSubmit);
+      }
+      // exec
+      function drawProb(inds) {
+        let e = document.getElementById(PROB_ID);
+        let i = inds[0];
+        e.innerText = probObjList[i].value;
+        e.dataset.ans = probObjList[i].key;
+      }
+      function drawAnsList(inds) {
+        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
+        for (let i = 0; i < 4; ++i) {
+          let e = document.getElementById(ansInds[i]);
+          let prob = probObjList[inds[i]];
+          e.innerText = prob.key;
+          e.dataset.ans = prob.key;
+        }
+      }
+      function draw(inds) {
+        drawProb(inds);
+        drawAnsList(inds);
+      }
+      function getProbInds() {
+        let s = new Set();
+        let n = probObjList.length;
+        if (n < 4)
+          return [];
+        while (s.size < 4) {
+          let randInd = Math.floor(Math.random() * n);
+          if (!s.has(randInd))
+            s.add(randInd);
+        }
+        return [...s];
+      }
+      function correct(id) {
+        document.getElementById(id).style = "background: greenyellow;";
+        curScore++;
+        drawCurrentScore();
+      }
+      function wrong(id) {
+        document.getElementById(id).style = "background: orangered;";
+      }
+      function resetAllAnsStyle() {
+        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
+        for (let i = 0; i < 4; ++i)
+          document.getElementById(ansInds[i]).style = "";
+      }
+      function onClickAns(evt) {
+        printf(evt.target);
+        let probAns = document.getElementById(PROB_ID).dataset.ans;
+        if (evt.target.dataset.ans == probAns)
+          correct(evt.target.id);
+        else
+          wrong(evt.target.id);
+      }
+      function onClickNext() {
+        let inds = getProbInds();
+        resetAllAnsStyle();
+        draw(inds);
+      }
+      function drawCurrentScore() {
+        document.getElementById(CURRENT_SCORE_ID).innerText = curScore;
+      }
+      function resetCurrentScore() {
+        curScore = 0;
+        document.getElementById(CURRENT_SCORE_ID).innerText = curScore;
+      }
+      function initExec() {
+        let ansInds = [ANS1_ID, ANS2_ID, ANS3_ID, ANS4_ID];
+        let e = document.getElementById(NEXT_ID);
+
+        for (let i = 0; i < 4; ++i) {
+          let e = document.getElementById(ansInds[i]);
+          e.addEventListener("click", onClickAns);
+        }
+
+        e.addEventListener("click", onClickNext);
+      }
+      // exit
+      function onClickExit() {
+        visibleSetup();
+        hideRunning();
+        // resetAllAnsStyle();
+        // resetCurrentScore();
+        cleanup();
+      }
+      function initExit() {
+        document.getElementById(EXIT_ID).addEventListener("click", onClickExit);
+      }
+      function clearProbObjList() {
+        probObjList.splice(0, probObjList.length);
+      }
+      function cleanup() {
+        resetAllAnsStyle();
+        resetCurrentScore();
+        clearProbDataForm();
+        clearProbObjList();
+      }
+      function main() {
+        initSetup();
+        initExec();
+        initExit();
+      }
+      main();
+    </script>
   </body>
 </html>
