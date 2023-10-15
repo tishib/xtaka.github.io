@@ -2,25 +2,32 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <!-- nes.css minify -->
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
   </head>
   <body>
     <div id="setup">
       <div>
-        <textarea id="prob_data" data-ans=""></textarea>
+        <textarea id="prob_data" data-ans="" class="nes-textarea"></textarea>
       </div>
-      <button id="submit">Create Problems</button>
+      <button id="submit" type="button" class="nes-btn is-primary">Start</button>
     </div>
     <div id="running">
-      <div><p>current score: <span id="cur_score">0</span> / <span id="cur_ans_num">0</span></p></div>
+      <div>
+        <p>current score: <span id="cur_score">0</span>/<span id="cur_ans_num">0</span></p>
+      </div>
       <div><p id="prob">Problem Statements</p></div>
-      <ul>
-        <li id="ans1" data-ans="">Answer1</li>
-        <li id="ans2" data-ans="">Answer2</li>
-        <li id="ans3" data-ans="">Answer3</li>
-        <li id="ans4" data-ans="">Answer4</li>
-      </ul>
-      <button id="next">Next</button>
-      <button id="exit">Exit</button>
+      <div class="lists">
+        <ul class="nes-list is-disc">
+          <li id="ans1" data-ans="">Good morning.</li>
+          <li id="ans2" data-ans="">Thou hast had a good night's sleep, I hope.</li>
+          <li id="ans3" data-ans="">Thou hast had a good afternoon</li>
+          <li id="ans4" data-ans="">Good night.</li>
+        </ul>
+      </div>
+      <button id="next" type="button" class="nes-btn is-success">Next</button>
+      <button id="exit" type="button" class="nes-btn is-error">Exit</button>
     </div>
     <script>
       const probObjList = [];
