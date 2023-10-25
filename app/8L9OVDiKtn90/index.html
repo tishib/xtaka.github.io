@@ -8,7 +8,7 @@
     <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
   </head>
   <body>
-    <div style="margin: 5px;">
+    <div style="padding: 5px; position: relative; min-height: 100%;">
       <div id="setup">
         <div>
           <textarea id="prob_data" data-ans="" class="nes-textarea"></textarea>
@@ -41,6 +41,10 @@
           <a id="next" class="nes-btn is-success" href="#">Next</a>
           <a id="exit" class="nes-btn is-error" href="#">Exit</a>  
         </div>
+      </div>
+      <div style="position: absolute; bottom: 5px; right: 5px;">
+        <!-- octocat -->
+        <i class="nes-octocat animate"></i>
       </div>
     </div>
     <script>
