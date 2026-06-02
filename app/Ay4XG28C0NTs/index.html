@@ -6,11 +6,11 @@
   <title>天気</title>
   <style>
     :root {
-      --bg: #080c14;
-      --fg: #c8d8e8;
-      --accent: #4a9eff;
-      --dim: #3a5060;
-      --sep: #142030;
+      --bg: #f5f8fc;
+      --fg: #1a2a3a;
+      --accent: #1a6acc;
+      --dim: #7a9ab0;
+      --sep: #d0dde8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -30,7 +30,7 @@
       inset: 0;
       background: repeating-linear-gradient(
         transparent 0, transparent 3px,
-        rgba(0,0,0,.04) 3px, rgba(0,0,0,.04) 4px
+        rgba(0,0,0,.02) 3px, rgba(0,0,0,.02) 4px
       );
       pointer-events: none;
       z-index: 999;
@@ -197,12 +197,12 @@ const ICONS = {
 const SYM = { sunny:'☀', partlyCloudy:'⛅', cloudy:'☁', rainy:'🌧', snowy:'❄', thunder:'⛈' };
 const TXT = { sunny:'晴れ', partlyCloudy:'晴れ/曇り', cloudy:'曇り', rainy:'雨', snowy:'雪', thunder:'雷雨' };
 const THEMES = {
-  sunny:        ['#0c0e08', '#ffaa33', '#665533', '#332200'],
-  partlyCloudy: ['#080c10', '#66aacc', '#3a5568', '#1a3045'],
-  cloudy:       ['#090909', '#8899aa', '#445566', '#1a2233'],
-  rainy:        ['#040810', '#4488ff', '#2a3a5a', '#0a1530'],
-  snowy:        ['#070b12', '#99ccee', '#3a5060', '#1a3040'],
-  thunder:      ['#05050a', '#aa66ff', '#3a2a55', '#1a0a33'],
+  sunny:        ['#fffdf2', '#c47800', '#a07848', '#f0e0b8'],
+  partlyCloudy: ['#f4f8ff', '#1a68a0', '#6a8a9a', '#c8dce8'],
+  cloudy:       ['#f6f7f9', '#445566', '#7a8a99', '#ccd4dc'],
+  rainy:        ['#f0f4ff', '#1a55cc', '#4a6090', '#c0cce8'],
+  snowy:        ['#f4faff', '#2277aa', '#5a8099', '#c8dce8'],
+  thunder:      ['#f7f4ff', '#6633bb', '#7055aa', '#d8c8ee'],
 };
 
 function cat(code) {
