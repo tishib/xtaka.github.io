@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天気</title>
+  <style>
+    :root {
+      --bg: #080c14;
+      --fg: #c8d8e8;
+      --accent: #4a9eff;
+      --dim: #3a5060;
+      --sep: #142030;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 1.5rem 1rem;
+      transition: background 1.5s;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent 0, transparent 3px,
+        rgba(0,0,0,.04) 3px, rgba(0,0,0,.04) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+    .frame {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid var(--accent);
+      transition: border-color 1.5s;
+    }
+    .row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5rem 1rem;
+    }
+    .city  { color: var(--accent); font-size: 1rem; letter-spacing: .1em; }
+    .clock { color: var(--dim); font-size: .8rem; }
+    hr.div { border: none; border-top: 1px solid var(--accent); margin: 0; }
+    .current {
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+      padding: 1rem;
+      border-top: 1px solid var(--sep);
+    }
+    pre.icon {
+      color: var(--accent);
+      font-size: .7rem;
+      line-height: 1.55;
+      flex-shrink: 0;
+      margin: 0;
+    }
+    .info-desc  { font-size: .85rem; margin-bottom: .4rem; line-height: 1.4; }
+    .info-temp  { font-size: 2rem; color: var(--accent); line-height: 1; }
+    .info-range { font-size: .72rem; color: var(--dim); margin-top: .3rem; }
+    .sec {
+      font-size: .68rem;
+      color: var(--accent);
+      letter-spacing: .12em;
+      padding: .4rem 1rem .2rem;
+      border-top: 1px solid var(--accent);
+    }
+    .pops { padding: .4rem .75rem .8rem; overflow-x: auto; }
+    .pops-inner { display: flex; gap: .35rem; min-width: max-content; }
+    .pc     { text-align: center; min-width: 34px; }
+    .pc-t   { font-size: .58rem; color: var(--dim); }
+    .pc-v   { font-size: .7rem;  color: var(--fg);  margin: .12rem 0; }
+    .pc-b   { font-size: .62rem; color: var(--accent); letter-spacing: -.5px; }
+    .weekly { padding: .4rem .75rem .8rem; }
+    .wr {
+      display: grid;
+      grid-template-columns: 2ch 2ch 1fr auto auto;
+      gap: .4rem;
+      align-items: center;
+      padding: .28rem 0;
+      font-size: .78rem;
+      border-bottom: 1px dashed var(--sep);
+    }
+    .wr:last-child { border-bottom: none; }
+    .wd { color: var(--accent); }
+    .ws { text-align: center; }
+    .wl { color: var(--dim); font-size: .62rem; overflow: hidden; white-space: nowrap; }
+    .wt { color: var(--fg);     font-size: .7rem; white-space: nowrap; }
+    .wp { color: var(--accent); font-size: .7rem; white-space: nowrap; }
+    .foot {
+      padding: .3rem 1rem;
+      font-size: .58rem;
+      color: var(--dim);
+      border-top: 1px solid var(--sep);
+    }
+    .msg { padding: 2rem 1rem; text-align: center; color: var(--dim); }
+  </style>
+</head>
+<body>
+<div class="frame">
+  <div class="row-header">
+    <span class="city" id="city-label">[ -- ]</span>
+    <span class="clock" id="clock">--:--</span>
+  </div>
+  <hr class="div">
+  <div id="body" class="msg">位置情報を取得中...<br><br>&gt; navigator.geolocation</div>
+</div>
+
+<script>
+// 気象庁 office コード → [code, lat, lon, fallback名]
+const PREFS = [
+  ['011000', 45.4, 141.7, '宗谷'],
+  ['012000', 44.0, 142.4, '上川・留萌'],
+  ['013000', 44.0, 143.8, '網走・北見・紋別'],
+  ['014030', 43.1, 143.2, '十勝'],
+  ['014100', 43.1, 144.4, '釧路・根室'],
+  ['015000', 42.7, 142.0, '胆振・日高'],
+  ['016000', 43.1, 141.1, '石狩・空知・後志'],
+  ['017000', 41.9, 140.7, '渡島・檜山'],
+  ['020000', 40.8, 140.7, '青森'],
+  ['030000', 39.7, 141.1, '岩手'],
+  ['040000', 38.3, 141.0, '宮城'],
+  ['050000', 39.7, 140.1, '秋田'],
+  ['060000', 38.2, 140.4, '山形'],
+  ['070000', 37.4, 140.5, '福島'],
+  ['080000', 36.3, 140.4, '茨城'],
+  ['090000', 36.6, 139.9, '栃木'],
+  ['100000', 36.4, 139.1, '群馬'],
+  ['110000', 35.9, 139.6, '埼玉'],
+  ['120000', 35.6, 140.1, '千葉'],
+  ['130000', 35.7, 139.7, '東京'],
+  ['140000', 35.4, 139.6, '神奈川'],
+  ['150000', 37.9, 139.1, '新潟'],
+  ['160000', 36.7, 137.2, '富山'],
+  ['170000', 36.6, 136.6, '石川'],
+  ['180000', 36.1, 136.2, '福井'],
+  ['190000', 35.7, 138.6, '山梨'],
+  ['200000', 36.7, 138.2, '長野'],
+  ['210000', 35.4, 136.7, '岐阜'],
+  ['220000', 34.9, 138.4, '静岡'],
+  ['230000', 35.2, 136.9, '愛知'],
+  ['240000', 34.7, 136.5, '三重'],
+  ['250000', 35.0, 136.0, '滋賀'],
+  ['260000', 35.0, 135.8, '京都'],
+  ['270000', 34.7, 135.5, '大阪'],
+  ['280000', 34.7, 135.2, '兵庫'],
+  ['290000', 34.7, 135.8, '奈良'],
+  ['300000', 34.2, 135.2, '和歌山'],
+  ['310000', 35.5, 134.2, '鳥取'],
+  ['320000', 35.5, 133.1, '島根'],
+  ['330000', 34.7, 133.9, '岡山'],
+  ['340000', 34.4, 132.5, '広島'],
+  ['350000', 34.2, 131.5, '山口'],
+  ['360000', 34.1, 134.6, '徳島'],
+  ['370000', 34.3, 134.0, '香川'],
+  ['380000', 33.8, 132.8, '愛媛'],
+  ['390000', 33.6, 133.5, '高知'],
+  ['400000', 33.6, 130.4, '福岡'],
+  ['410000', 33.2, 130.3, '佐賀'],
+  ['420000', 32.8, 129.9, '長崎'],
+  ['430000', 32.8, 130.7, '熊本'],
+  ['440000', 33.2, 131.6, '大分'],
+  ['450000', 31.9, 131.4, '宮崎'],
+  ['460100', 31.6, 130.6, '鹿児島'],
+  ['471000', 26.3, 127.8, '沖縄本島'],
+  ['472000', 25.9, 131.3, '大東島'],
+  ['473000', 24.8, 125.3, '宮古島'],
+  ['474000', 24.3, 124.2, '八重山'],
+];
+
+function nearestPref(lat, lon) {
+  let best = PREFS[0], minD = Infinity;
+  for (const p of PREFS) {
+    const d = (p[1] - lat) ** 2 + (p[2] - lon) ** 2;
+    if (d < minD) { minD = d; best = p; }
+  }
+  return best;
+}
+
+const ICONS = {
+  sunny:        ['   \\   /  ', '    .-.   ', ' --(   )--', "    '-'   ", '   /   \\  '],
+  partlyCloudy: ['  \\  /    ', '   .--.   ', '  (    ).  ', ' (______) ', '          '],
+  cloudy:       ['          ', '  .----.  ', ' (      ) ', ' (______) ', '          '],
+  rainy:        ['  .----.  ', ' (      ) ', ' (______) ', "  ' ' ' ' ", "   ' ' '  "],
+  snowy:        ['  .----.  ', ' (      ) ', ' (______) ', '  *  *  * ', '   *  *   '],
+  thunder:      ['  .----.  ', ' (      ) ', ' (______) ', '    \\⚡/  ', "   ' ' '  "],
+};
+const SYM = { sunny:'☀', partlyCloudy:'⛅', cloudy:'☁', rainy:'🌧', snowy:'❄', thunder:'⛈' };
+const TXT = { sunny:'晴れ', partlyCloudy:'晴れ/曇り', cloudy:'曇り', rainy:'雨', snowy:'雪', thunder:'雷雨' };
+const THEMES = {
+  sunny:        ['#0c0e08', '#ffaa33', '#665533', '#332200'],
+  partlyCloudy: ['#080c10', '#66aacc', '#3a5568', '#1a3045'],
+  cloudy:       ['#090909', '#8899aa', '#445566', '#1a2233'],
+  rainy:        ['#040810', '#4488ff', '#2a3a5a', '#0a1530'],
+  snowy:        ['#070b12', '#99ccee', '#3a5060', '#1a3040'],
+  thunder:      ['#05050a', '#aa66ff', '#3a2a55', '#1a0a33'],
+};
+
+function cat(code) {
+  const c = +code || 0;
+  if (c >= 400) return 'snowy';
+  if (c >= 320) return 'thunder';
+  if (c >= 300) return 'rainy';
+  if (c >= 200) return (c === 201 || c === 202 || c === 211) ? 'partlyCloudy' : 'cloudy';
+  if ([101, 102, 110, 111].includes(c)) return 'partlyCloudy';
+  return 'sunny';
+}
+
+function applyTheme(k) {
+  const [bg, ac, dm, sp] = THEMES[k] || THEMES.cloudy;
+  const r = document.documentElement;
+  r.style.setProperty('--bg', bg);
+  r.style.setProperty('--accent', ac);
+  r.style.setProperty('--dim', dm);
+  r.style.setProperty('--sep', sp);
+  document.body.style.background = bg;
+}
+
+function bar(p) {
+  const n = Math.round((+p || 0) / 25);
+  return '█'.repeat(n) + '░'.repeat(4 - n);
+}
+
+function relHours(iso) {
+  if (!iso) return '--h';
+  const h = Math.round((new Date(iso) - Date.now()) / 3600000);
+  return '+' + h + 'h';
+}
+
+function weekDay(iso) {
+  const d = new Date(iso);
+  const jst = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+  return '日月火水木金土'[jst.getDay()];
+}
+
+function updateClock() {
+  const el = document.getElementById('clock');
+  if (!el) return;
+  const jst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+  const day = '日月火水木金土'[jst.getDay()];
+  el.textContent = `${day} ${String(jst.getHours()).padStart(2, '0')}:${String(jst.getMinutes()).padStart(2, '0')}`;
+}
+
+async function loadWeather(prefCode, fallbackName) {
+  document.getElementById('city-label').textContent = `[ ${fallbackName} ]`;
+  document.getElementById('body').innerHTML =
+    `<div class="msg">データ取得中...<br><br>&gt; jma.go.jp/bosai/forecast/${prefCode}</div>`;
+
+  try {
+    const data = await fetch(
+      `https://www.jma.go.jp/bosai/forecast/data/forecast/${prefCode}.json`
+    ).then(r => { if (!r.ok) throw Error('HTTP ' + r.status); return r.json(); });
+
+    const [wS, pS, tS] = data[0].timeSeries;
+    const wA = wS.areas[0];
+    const pA = pS.areas[0];
+    const tA = tS.areas[0];
+
+    const todayCode = wA.weatherCodes?.[0] || '200';
+    const todayDesc = (wA.weathers?.[0] || '').replace(/\s+/g, ' ').trim().slice(0, 16);
+    const k = cat(todayCode);
+    applyTheme(k);
+
+    document.getElementById('city-label').textContent = `[ ${wA.area.name} ]`;
+
+    // 今日の最低・最高気温（気象庁は 00:00 = 最低, 09:00 = 最高 で格納）
+    const todayJST = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+    let lo = '--', hi = '--';
+    (tS.timeDefines || []).forEach((t, i) => {
+      const v = tA.temps?.[i];
+      if (v === '' || v == null) return;
+      if (t.slice(0, 10) !== todayJST) return;
+      if (+t.slice(11, 13) < 6) lo = v; else hi = v;
+    });
+
+    const pops   = pA.pops || [];
+    const pTimes = pS.timeDefines || [];
+
+    const [wkW, wkT] = data[1].timeSeries;
+    const wkA  = wkW.areas[0];
+    const wkTA = wkT.areas[0];
+    const wkDays  = wkW.timeDefines || [];
+    const wkCodes = wkA.weatherCodes || [];
+    const wkPops  = wkA.pops || [];
+    const wkMin   = wkTA?.tempsMin || [];
+    const wkMax   = wkTA?.tempsMax || [];
+
+    const showTemp  = hi !== '--' ? hi : lo;
+    const iconLines = (ICONS[k] || ICONS.cloudy).join('\n');
+
+    document.getElementById('body').innerHTML = `
+      <div class="current">
+        <pre class="icon">${iconLines}</pre>
+        <div>
+          <div class="info-desc">${todayDesc}</div>
+          <div class="info-temp">${showTemp}°</div>
+          <div class="info-range">▼ ${lo}°　▲ ${hi}°</div>
+        </div>
+      </div>
+      <div class="sec">── 降水確率　6時間毎</div>
+      <div class="pops">
+        <div class="pops-inner">
+          ${pops.slice(0, 8).map((p, i) => `
+            <div class="pc">
+              <div class="pc-t">${relHours(pTimes[i])}</div>
+              <div class="pc-v">${p}%</div>
+              <div class="pc-b">${bar(p)}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="sec">── 週間予報</div>
+      <div class="weekly">
+        ${wkDays.map((t, i) => {
+          const c = cat(wkCodes[i] || '200');
+          return `<div class="wr">
+            <span class="wd">${weekDay(t)}</span>
+            <span class="ws">${SYM[c]}</span>
+            <span class="wl">${TXT[c]}</span>
+            <span class="wt">${wkMin[i] || '--'}/${wkMax[i] || '--'}°</span>
+            <span class="wp">${wkPops[i] || '--'}%</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="foot">&gt; 気象庁　&gt; ${new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} 更新</div>
+    `;
+
+  } catch (e) {
+    document.getElementById('body').innerHTML =
+      `<div class="msg" style="color:#f44">エラー: ${e.message}</div>`;
+  }
+}
+
+function init() {
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  if (!navigator.geolocation) {
+    loadWeather('130000', '東京');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const [code, , , name] = nearestPref(pos.coords.latitude, pos.coords.longitude);
+      loadWeather(code, name);
+    },
+    () => loadWeather('130000', '東京'),
+    { timeout: 8000, maximumAge: 300000 }
+  );
+}
+
+init();
+</script>
+</body>
+</html>
