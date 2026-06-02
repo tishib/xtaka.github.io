@@ -103,6 +103,35 @@
       border-top: 1px solid var(--sep);
     }
     .msg { padding: 2rem 1rem; text-align: center; color: var(--dim); }
+
+    @keyframes sun-pulse {
+      0%, 100% { filter: drop-shadow(0 0 3px var(--accent)); transform: scale(1); }
+      50%       { filter: drop-shadow(0 0 10px var(--accent)); transform: scale(1.06); }
+    }
+    @keyframes cloud-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
+    @keyframes rain-drip {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(4px); opacity: .8; }
+    }
+    @keyframes snow-drift {
+      0%, 100% { transform: translate(0, 0); }
+      33%       { transform: translate(3px, -2px); }
+      66%       { transform: translate(-3px, 2px); }
+    }
+    @keyframes lightning-flash {
+      0%, 78%, 100%  { filter: brightness(1); }
+      80%, 84%        { filter: brightness(1.9) drop-shadow(0 0 8px var(--accent)); }
+      82%, 87%        { filter: brightness(.5); }
+    }
+    pre.icon[data-w="sunny"]        { animation: sun-pulse 2.5s ease-in-out infinite; }
+    pre.icon[data-w="partlyCloudy"] { animation: cloud-float 3s ease-in-out infinite; }
+    pre.icon[data-w="cloudy"]       { animation: cloud-float 4.5s ease-in-out infinite; }
+    pre.icon[data-w="rainy"]        { animation: rain-drip 1.4s ease-in-out infinite; }
+    pre.icon[data-w="snowy"]        { animation: snow-drift 4s ease-in-out infinite; }
+    pre.icon[data-w="thunder"]      { animation: lightning-flash 3.5s linear infinite; }
   </style>
 </head>
 <body>
@@ -299,7 +328,7 @@ async function loadWeather(prefCode, fallbackName) {
 
     document.getElementById('body').innerHTML = `
       <div class="current">
-        <pre class="icon">${iconLines}</pre>
+        <pre class="icon" data-w="${k}">${iconLines}</pre>
         <div>
           <div class="info-desc">${todayDesc}</div>
           <div class="info-temp">${showTemp}°</div>
