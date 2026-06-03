@@ -259,6 +259,72 @@ function bar(p) {
   return '█'.repeat(n) + '░'.repeat(4 - n);
 }
 
+function formatWeatherSummary(desc, code) {
+  const fallback = `${TXT[cat(code)] || '天気'}の予報です。`;
+  if (!desc) return fallback;
+
+  const normalized = desc
+    .replace(/\s+/g, ' ')
+    .replace(/くもり/g, '曇り')
+    .trim();
+  if (!normalized) return fallback;
+
+  const timeWords = [
+    '未明', '明け方', '朝', '昼前', '昼過ぎ', '夕方', '夜',
+    '朝晩', '午前', '午後', '日中'
+  ];
+  const weatherWords = ['晴れ', '曇り', '雨', '雪', '雷雨', 'みぞれ'];
+  const connectors = ['のち', '時々', '一時'];
+  const tokens = normalized.split(' ');
+  const clauses = [[]];
+
+  tokens.forEach(token => {
+    if (token === '所により') {
+      clauses.push([token]);
+      return;
+    }
+
+    const clause = clauses[clauses.length - 1];
+    const prev = clause[clause.length - 1];
+
+    if (timeWords.includes(token) && weatherWords.includes(prev)) {
+      clause.push('、', token);
+    } else if (weatherWords.includes(token) && timeWords.includes(prev)) {
+      clause.push('は', token);
+    } else if (weatherWords.includes(token) && prev === 'まで') {
+      clause.push(token);
+    } else if (
+      weatherWords.includes(token) &&
+      prev &&
+      !connectors.includes(prev) &&
+      prev !== 'から' &&
+      prev !== 'は' &&
+      prev !== '所により'
+    ) {
+      clause.push('、', token);
+    } else if (token === 'で') {
+      clause.push('、');
+    } else {
+      clause.push(token);
+    }
+  });
+
+  const sentences = clauses
+    .map(parts => parts.join('').replace(/、+/g, '、').replace(/^、|、$/g, ''))
+    .filter(Boolean)
+    .map((text, i) => {
+      if (text.includes('雷を伴う')) {
+        return text.replace(/雷を伴う$/, '雷を伴うことがあります');
+      }
+      if (text.startsWith('所により')) {
+        return `${text}の可能性があります`;
+      }
+      return i === 0 ? `${text}の予報です` : text;
+    });
+
+  return sentences.length ? `${sentences.join('。')}。` : fallback;
+}
+
 function relHours(iso) {
   if (!iso) return '--h';
   const h = Math.round((new Date(iso) - Date.now()) / 3600000);
@@ -295,8 +361,8 @@ async function loadWeather(prefCode, fallbackName) {
     const tA = tS.areas[0];
 
     const todayCode = wA.weatherCodes?.[0] || '200';
-    const todayDesc = (wA.weathers?.[0] || '').replace(/\s+/g, ' ').trim().slice(0, 16);
     const k = cat(todayCode);
+    const todayDesc = formatWeatherSummary(wA.weathers?.[0] || '', todayCode);
     applyTheme(k);
 
     document.getElementById('city-label').textContent = `[ ${wA.area.name} ]`;
