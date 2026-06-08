@@ -445,7 +445,29 @@ function selectedPref(code) {
   return PREFS.find(([prefCode]) => prefCode === code) || PREFS.find(([prefCode]) => prefCode === '130000') || PREFS[0];
 }
 
-function setupPrefSelect() {
+async function detectPrefCode() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords: { latitude, longitude } }) => {
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=ja`,
+            { headers: { 'User-Agent': 'weather-app/1.0' } }
+          );
+          const d = await r.json();
+          const state = d.address?.state || '';
+          const found = PREFS.find(([, name]) => name === state || state.startsWith(name) || name.startsWith(state));
+          resolve(found?.[0] ?? null);
+        } catch { resolve(null); }
+      },
+      () => resolve(null),
+      { timeout: 6000 }
+    );
+  });
+}
+
+async function setupPrefSelect() {
   const select = document.getElementById('pref-select');
   select.innerHTML = PREFS
     .map(([code, name]) => `<option value="${code}">${name}</option>`)
@@ -453,12 +475,12 @@ function setupPrefSelect() {
 
   select.addEventListener('change', () => {
     const [code, name] = selectedPref(select.value);
-    localStorage.setItem('weather-pref-code', code);
     loadWeather(code, name);
   });
 
-  const savedCode = localStorage.getItem('weather-pref-code');
-  const [code, name] = selectedPref(savedCode);
+  document.getElementById('body').innerHTML = '<div class="msg">位置情報を取得中...</div>';
+  const detectedCode = await detectPrefCode();
+  const [code, name] = selectedPref(detectedCode || '130000');
   select.value = code;
   loadWeather(code, name);
 }
