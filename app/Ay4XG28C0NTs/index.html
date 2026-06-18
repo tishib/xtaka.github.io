@@ -107,7 +107,7 @@
     .weekly { padding: .4rem .75rem .8rem; }
     .wr {
       display: grid;
-      grid-template-columns: 2ch 2ch 1fr auto auto;
+      grid-template-columns: 2ch 4ch 2ch 1fr auto auto;
       gap: .4rem;
       align-items: center;
       padding: .28rem 0;
@@ -116,6 +116,7 @@
     }
     .wr:last-child { border-bottom: none; }
     .wd { color: var(--accent); }
+    .wdate { color: var(--dim); font-size: .65rem; }
     .ws { text-align: center; }
     .wl { color: var(--dim); font-size: .62rem; overflow: hidden; white-space: nowrap; }
     .wt { color: var(--fg);     font-size: .7rem; white-space: nowrap; }
@@ -359,6 +360,12 @@ function weekDay(iso) {
   return '日月火水木金土'[jst.getDay()];
 }
 
+function monthDay(iso) {
+  const d = new Date(iso);
+  const jst = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+  return `${jst.getMonth() + 1}/${jst.getDate()}`;
+}
+
 function updateClock() {
   const el = document.getElementById('clock');
   if (!el) return;
@@ -439,6 +446,7 @@ async function loadWeather(prefCode, fallbackName) {
         ${wkDays.map((t, i) => {
           const c = cat(wkCodes[i] || '200');
           return `<div class="wr">
+            <span class="wdate">${monthDay(t)}</span>
             <span class="wd">${weekDay(t)}</span>
             <span class="ws">${SYM[c]}</span>
             <span class="wl">${TXT[c]}</span>
