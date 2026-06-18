@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>天気</title>
+  <title>Tenki</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {
@@ -157,6 +157,24 @@
     pre.icon[data-w="rainy"]        { animation: rain-drip 1.4s ease-in-out infinite; }
     pre.icon[data-w="snowy"]        { animation: snow-drift 4s ease-in-out infinite; }
     pre.icon[data-w="thunder"]      { animation: lightning-flash 3.5s linear infinite; }
+
+    .ghost-wrap {
+      position: fixed;
+      pointer-events: none;
+      z-index: 998;
+      animation: ghost-rise 9s ease-in-out forwards;
+    }
+    .ghost-wrap svg { animation: ghost-sway 3.5s ease-in-out infinite; transform-origin: 50% 12%; }
+    @keyframes ghost-rise {
+      0%   { transform: translateY(0);      opacity: 0; }
+      12%  { opacity: .78; }
+      82%  { opacity: .5;  transform: translateY(-170px); }
+      100% { transform: translateY(-230px); opacity: 0; }
+    }
+    @keyframes ghost-sway {
+      0%, 100% { transform: rotate(-7deg); }
+      50%       { transform: rotate(7deg); }
+    }
   </style>
 </head>
 <body>
@@ -374,7 +392,33 @@ function updateClock() {
   el.textContent = `${day} ${String(jst.getHours()).padStart(2, '0')}:${String(jst.getMinutes()).padStart(2, '0')}`;
 }
 
+let _ghostTimer = null;
+
+function _clearGhosts() {
+  clearTimeout(_ghostTimer);
+  _ghostTimer = null;
+  document.querySelectorAll('.ghost-wrap').forEach(e => e.remove());
+}
+
+function _spawnGhost() {
+  const wrap = document.createElement('div');
+  wrap.className = 'ghost-wrap';
+  const sz = Math.round(Math.random() * 20 + 28);
+  wrap.style.left   = (Math.random() * 74 + 5) + 'vw';
+  wrap.style.bottom = (Math.random() * 10 + 1) + 'vh';
+  wrap.innerHTML = `<img src="ghost.svg" width="${sz}" height="${Math.round(sz * 0.86)}" style="display:block;">`;
+  document.body.appendChild(wrap);
+  wrap.addEventListener('animationend', () => wrap.remove());
+}
+
+function _scheduleGhost() {
+  _ghostTimer = setTimeout(() => { _spawnGhost(); _scheduleGhost(); }, Math.random() * 5000 + 2000);
+}
+
+function _startGhosts() { _clearGhosts(); _spawnGhost(); _scheduleGhost(); }
+
 async function loadWeather(prefCode, fallbackName) {
+  _clearGhosts();
   document.getElementById('city-label').textContent = `[ ${fallbackName} ]`;
   document.getElementById('body').innerHTML =
     `<div class="msg">データ取得中...<br><br>&gt; jma.go.jp/bosai/forecast/${prefCode}</div>`;
@@ -393,6 +437,7 @@ async function loadWeather(prefCode, fallbackName) {
     const k = cat(todayCode);
     const todayDesc = formatWeatherSummary(wA.weathers?.[0] || '', todayCode);
     applyTheme(k);
+    if (k === 'rainy' || k === 'thunder') { _startGhosts(); }
 
     document.getElementById('city-label').textContent = `[ ${wA.area.name} ]`;
 
