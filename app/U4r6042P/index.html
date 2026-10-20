@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mermaid Editor</title>
+<style>
+  :root {
+    --bg: #1e1e1e;
+    --panel: #252526;
+    --border: #3c3c3c;
+    --text: #d4d4d4;
+    --accent: #4ec9b0;
+    --accent-hover: #6fd9c3;
+    --danger: #e06c75;
+    --muted: #8a8a8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Hiragino Sans", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 15px;
+    margin: 0 12px 0 0;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  input[type="text"], select {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  input[type="text"] { min-width: 160px; }
+  button {
+    background: var(--border);
+    color: var(--text);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover { background: #4a4a4a; }
+  button.primary { background: var(--accent); color: #0a0a0a; font-weight: 600; }
+  button.primary:hover { background: var(--accent-hover); }
+  button.danger { background: var(--danger); color: #1a1a1a; }
+  button.danger:hover { opacity: 0.85; }
+  .spacer { flex: 1; }
+  main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+  .pane {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+  }
+  .pane:last-child { border-right: none; }
+  .pane-title {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  textarea {
+    flex: 1;
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: none;
+    resize: none;
+    padding: 12px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+  }
+  #preview-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  #preview-wrap svg { max-width: 100%; height: auto; }
+  #error {
+    padding: 12px;
+    color: var(--danger);
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    display: none;
+  }
+  footer {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mermaid Editor</h1>
+  <select id="diagram-select"><option value="">(未保存)</option></select>
+  <input type="text" id="diagram-name" placeholder="図の名前" value="名称未設定">
+  <button id="btn-new">新規</button>
+  <button id="btn-save" class="primary">保存</button>
+  <button id="btn-delete" class="danger">削除</button>
+  <div class="spacer"></div>
+  <button id="btn-export-svg">SVGダウンロード</button>
+  <button id="btn-export-png">PNGダウンロード</button>
+</header>
+
+<main>
+  <div class="pane">
+    <div class="pane-title">コード</div>
+    <textarea id="code" spellcheck="false">graph TD
+    A[開始] --> B{条件}
+    B -->|Yes| C[処理1]
+    B -->|No| D[処理2]
+    C --> E[終了]
+    D --> E</textarea>
+  </div>
+  <div class="pane">
+    <div class="pane-title">プレビュー</div>
+    <div id="error"></div>
+    <div id="preview-wrap"><div id="preview"></div></div>
+  </div>
+</main>
+
+<footer id="status">準備完了</footer>
+
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+mermaid.initialize({ startOnLoad: false, theme: "dark" });
+
+const STORAGE_KEY = "mermaidEditor.diagrams";
+
+const codeEl = document.getElementById("code");
+const nameEl = document.getElementById("diagram-name");
+const selectEl = document.getElementById("diagram-select");
+const previewEl = document.getElementById("preview");
+const errorEl = document.getElementById("error");
+const statusEl = document.getElementById("status");
+
+let currentId = null;
+let renderTimer = null;
+let renderSeq = 0;
+
+function loadDiagrams() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveDiagrams(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+function refreshSelect(selectedId) {
+  const list = loadDiagrams();
+  selectEl.innerHTML = '<option value="">(未保存)</option>';
+  for (const d of list) {
+    const opt = document.createElement("option");
+    opt.value = d.id;
+    opt.textContent = d.name;
+    if (d.id === selectedId) opt.selected = true;
+    selectEl.appendChild(opt);
+  }
+}
+
+function setStatus(msg) {
+  statusEl.textContent = msg;
+}
+
+async function render() {
+  const code = codeEl.value;
+  const seq = ++renderSeq;
+  try {
+    const { svg } = await mermaid.render("mermaid-svg-" + seq, code);
+    if (seq !== renderSeq) return;
+    previewEl.innerHTML = svg;
+    errorEl.style.display = "none";
+  } catch (err) {
+    if (seq !== renderSeq) return;
+    errorEl.textContent = err.message || String(err);
+    errorEl.style.display = "block";
+  }
+}
+
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(render, 300);
+}
+
+codeEl.addEventListener("input", scheduleRender);
+
+document.getElementById("btn-new").addEventListener("click", () => {
+  currentId = null;
+  nameEl.value = "名称未設定";
+  codeEl.value = "graph TD\n    A --> B";
+  selectEl.value = "";
+  scheduleRender();
+  setStatus("新規図を作成");
+});
+
+document.getElementById("btn-save").addEventListener("click", () => {
+  const list = loadDiagrams();
+  const name = nameEl.value.trim() || "名称未設定";
+  if (currentId) {
+    const idx = list.findIndex((d) => d.id === currentId);
+    if (idx >= 0) {
+      list[idx].name = name;
+      list[idx].code = codeEl.value;
+      list[idx].updatedAt = Date.now();
+    }
+  } else {
+    currentId = crypto.randomUUID();
+    list.push({ id: currentId, name, code: codeEl.value, updatedAt: Date.now() });
+  }
+  saveDiagrams(list);
+  refreshSelect(currentId);
+  setStatus(`「${name}」を保存しました`);
+});
+
+document.getElementById("btn-delete").addEventListener("click", () => {
+  if (!currentId) {
+    setStatus("削除対象が選択されていません");
+    return;
+  }
+  if (!confirm("この図を削除しますか？")) return;
+  const list = loadDiagrams().filter((d) => d.id !== currentId);
+  saveDiagrams(list);
+  currentId = null;
+  nameEl.value = "名称未設定";
+  refreshSelect(null);
+  setStatus("削除しました");
+});
+
+selectEl.addEventListener("change", () => {
+  const id = selectEl.value;
+  if (!id) return;
+  const list = loadDiagrams();
+  const d = list.find((x) => x.id === id);
+  if (!d) return;
+  currentId = d.id;
+  nameEl.value = d.name;
+  codeEl.value = d.code;
+  scheduleRender();
+  setStatus(`「${d.name}」を読み込みました`);
+});
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("btn-export-svg").addEventListener("click", () => {
+  const svgEl = previewEl.querySelector("svg");
+  if (!svgEl) {
+    setStatus("プレビューにSVGがありません");
+    return;
+  }
+  const svgText = new XMLSerializer().serializeToString(svgEl);
+  const blob = new Blob([svgText], { type: "image/svg+xml" });
+  downloadBlob(blob, `${nameEl.value.trim() || "diagram"}.svg`);
+});
+
+document.getElementById("btn-export-png").addEventListener("click", () => {
+  const svgEl = previewEl.querySelector("svg");
+  if (!svgEl) {
+    setStatus("プレビューにSVGがありません");
+    return;
+  }
+  const svgText = new XMLSerializer().serializeToString(svgEl);
+  const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = () => {
+    const scale = 2;
+    const bbox = svgEl.getBoundingClientRect();
+    const width = (svgEl.viewBox?.baseVal?.width || bbox.width || img.width) * scale;
+    const height = (svgEl.viewBox?.baseVal?.height || bbox.height || img.height) * scale;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#1e1e1e";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob((blob) => {
+      downloadBlob(blob, `${nameEl.value.trim() || "diagram"}.png`);
+    }, "image/png");
+  };
+  img.onerror = () => setStatus("PNG変換に失敗しました");
+  img.src = url;
+});
+
+refreshSelect(null);
+render();
+</script>
+
+</body>
+</html>
